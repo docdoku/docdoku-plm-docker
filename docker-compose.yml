@@ -1,0 +1,102 @@
+# Developer compose file
+#
+# Payara + system dependencies
+# Static web front sources
+# MySQL
+# Nginx
+# ElasticSearch
+#
+
+version: '2'
+
+services:
+
+  # Web front: nginx server on host source files  
+  # volumes: static files from web front source on the host.
+  front:
+    build:
+      context: ./front
+    volumes:
+      - ../docdoku-web-front/app:/usr/share/nginx/html    
+    networks:
+      - network
+    ports:
+      - "13000:3000"
+
+  # Payara instance - JEE application server
+  # Settings:
+  #  - DOCDOKU_PLM_CODEBASE : Web front address
+  back:
+    depends_on:
+      - db
+      - es
+    build:
+      context: ./back
+      args:       
+        - DOCDOKU_PLM_CODEBASE=http://localhost:10080
+    volumes:
+      - "./autodeploy:/opt/payara41/glassfish/domains/domain1/autodeploy"
+      - "./localdata/vault:/var/lib/docdoku/vault"
+    networks:
+      - network
+    ports:
+      - "18080:8080"
+      - "14848:4848"
+      - "19009:9009"
+      - "18686:8686"  
+    links:
+      - "db:db"
+      - "es:es"
+
+  # Nginx global proxy 
+  # The application will run at http://localhost:10080, change if needed
+  proxy:
+    depends_on:
+      - front
+      - back
+    build:
+      context: ./proxy
+      args:
+        - SERVER_NAME=localhost
+        - SERVER_PORT=80
+    networks:
+      - network
+    ports:
+      - "10080:80"
+    links:
+      - "front:front"
+      - "back:back"    
+
+
+  # ElasticSearch instance
+  es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.4.0
+    environment:
+      - cluster.name=docdokuplm
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    mem_limit: 1g   
+    networks:
+      - network
+    ports:      
+      - "19200:9200"
+      - "19300:9300"
+
+  # MySQL instance
+  db:  
+    build: ./db
+    volumes:
+      - "./localdata/db:/var/lib/mysql"
+    networks:
+      - network
+    ports:
+      - "13306:3306"
+
+networks:
+  network:
+    driver: bridge
+
