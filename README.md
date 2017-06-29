@@ -1,6 +1,6 @@
 # DocDokuPLM docker-compose
 
-This project aims to deploy a DocDokuPLM platform with docker-compose
+This project aims to deploy a DocDokuPLM platform with docker-compose, for debugging and development only
 
 ## Installation
 
@@ -26,7 +26,7 @@ The first time can take a few minutes (system image build)
 
 Prepare the folders before first launch
 
-	mkdir -p {source,localdata/{db,vault},autodeploy/bundles}
+	mkdir -p {localdata/{db,vault},autodeploy/bundles}
 
 
 Download and extract web-front files and edit the compose file if needed
