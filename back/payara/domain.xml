@@ -75,15 +75,15 @@
       <property name="auto_expand_replicas" value="0-3"></property>
       <property name="cluster_name" value="docdokuplm"></property>
       <property name="xpack_security_user" value="elastic:changeme"></property>
-    </custom-resource>
-    <custom-resource factory-class="org.glassfish.resources.custom.factory.PropertiesFactory" res-type="java.util.Properties" jndi-name="docdokuplm.auth">
-      <property name="jwt.enabled" value="true"></property>
-      <property name="basic.enabled" value="true"></property>
-      <property name="session.enabled" value="true"></property>
-    </custom-resource>
+    </custom-resource>   
     <custom-resource factory-class="org.glassfish.resources.custom.factory.PropertiesFactory" res-type="java.util.Properties" jndi-name="office.config">
       <property name="office_home" value="/usr/lib/libreoffice"></property>
       <property name="office_port" value="8100"></property>
+    </custom-resource>
+    <custom-resource factory-class="org.glassfish.resources.custom.factory.PropertiesFactory" res-type="java.util.Properties" jndi-name="auth.config">
+      <property name="jwt.enabled" value="true"></property>
+      <property name="basic.header.enabled" value="false"></property>
+      <property name="session.enabled" value="true"></property>
     </custom-resource>
     <jdbc-connection-pool is-isolation-level-guaranteed="false" datasource-classname="org.apache.derby.jdbc.ClientDataSource" name="SamplePool" res-type="javax.sql.DataSource">
       <property name="User" value="app"></property>
@@ -107,9 +107,9 @@
       <resource-ref ref="jdbc/docdokuPU"></resource-ref>
       <resource-ref ref="mail/docdokuSMTP"></resource-ref>
       <resource-ref ref="docdokuplm.config"></resource-ref>
-      <resource-ref ref="docdokuplm.auth"></resource-ref>
       <resource-ref ref="elasticsearch.config"></resource-ref>
       <resource-ref ref="office.config"></resource-ref>
+      <resource-ref ref="auth.config"></resource-ref>
       <resource-ref ref="jdbc/sample"></resource-ref>
     </server>
   </servers>
