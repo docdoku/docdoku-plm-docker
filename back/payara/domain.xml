@@ -83,7 +83,7 @@
     <custom-resource factory-class="org.glassfish.resources.custom.factory.PropertiesFactory" res-type="java.util.Properties" jndi-name="auth.config">
       <property name="jwt.enabled" value="true"></property>
       <property name="basic.header.enabled" value="false"></property>
-      <property name="session.enabled" value="true"></property>
+      <property name="session.enabled" value="false"></property>
     </custom-resource>
     <jdbc-connection-pool is-isolation-level-guaranteed="false" datasource-classname="org.apache.derby.jdbc.ClientDataSource" name="SamplePool" res-type="javax.sql.DataSource">
       <property name="User" value="app"></property>
