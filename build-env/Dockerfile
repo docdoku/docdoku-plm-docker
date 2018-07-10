@@ -15,13 +15,22 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with DocDokuPLM.  If not, see <http://www.gnu.org/licenses/>.
+#
+## DocDokuPLM build environment
+#
+# Needed components:
+#
+# Java jdk8
+# Node >= 8.x
+# Maven 3
+# Linux toolchain
 
-# DocDokuPLM MySQL build
+FROM openjdk:8-jdk
 
-FROM mysql:5.7.15
+RUN \
+    curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
+    apt-get update && \
+    apt-get install -y maven nodejs gcc make build-essential
 
-ENV MYSQL_DATABASE=docdokuplm \
-    MYSQL_ROOT_PASSWORD=password
-
-# Add to init scripts
-ADD init.sql /docker-entrypoint-initdb.d
+# Allow dependency cache control
+VOLUME ["/src", "/root/.m2", "/root/.npm"]

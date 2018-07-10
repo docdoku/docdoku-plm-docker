@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+
+# DocDoku, Professional Open Source
+# Copyright 2006 - 2017 DocDoku SARL
+#
+# This file is part of DocDokuPLM.
+#
+# DocDokuPLM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# DocDokuPLM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with DocDokuPLM.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+init () {
+    echo "Running mkdir for volumes ..."
+    mkdir -p volumes
+    mkdir -p volumes/{db,vault,plugins,native-libs,m2,npm,web-front,autodeploy}
+
+    # Clone all repositories
+    echo "Cloning repositories ..."
+    git clone --single-branch -b develop https://github.com/polarsys/eplmp.git ./volumes/src/eplmp
+    git clone --single-branch -b dev https://github.com/docdoku/docdoku-plm.git ./volumes/src/docdoku-plm
+    git clone --single-branch -b dev https://github.com/docdoku/docdoku-web-front.git ./volumes/src/docdoku-web-front
+
+    # Build the base payara image with dependencies
+    echo "Building base image ..."
+    docker build -t docdokuplm:payara back/payara
+
+    echo "Building platform components..."
+    docker-compose build
+}
+
+down() {
+    echo "Stopping current containers ..."
+    docker-compose down
+}
+
+up () {
+    echo "Running the platform ..."
+    docker-compose up -d
+}
+
+build (){
+    echo "Building artifacts ..."
+    docker-compose run build-env bash -c "cd /src/docdoku-web-front && npm run build"
+    docker-compose run build-env bash -c "cd /src/eplmp && mvn clean install"
+    docker-compose run build-env bash -c "cd /src/docdoku-plm && mvn clean install"
+}
+
+deploy () {
+    echo "Deploying artifacts ..."
+    rm -rf ./volumes/autodeploy/*
+    cp ./volumes/src/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear ./volumes/autodeploy/
+    echo "Done"
+}
+
+logs (){
+    docker-compose logs -f
+}
+
+
+usage () {
+    echo "Usage : platform-ctl <cmd>"
+    echo "  <cmd>: init/build/deploy/up/down/logs"
+}
+
+case "$1" in
+'build')
+    build
+    ;;
+'init')
+   init
+    ;;
+'deploy')
+   deploy
+    ;;
+'up')
+    down && \
+    up
+    ;;
+'down')
+    down
+    ;;
+'logs')
+    logs
+    ;;
+*)
+    usage
+    ;;
+esac
+

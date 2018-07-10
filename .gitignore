@@ -1,4 +1,2 @@
-source/
-autodeploy/
-localdata/
-
+.idea/
+volumes/

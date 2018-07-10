@@ -1,11 +1,22 @@
-# Developer compose file
+# DocDoku, Professional Open Source
+# Copyright 2006 - 2017 DocDoku SARL
 #
-# Payara + system dependencies
-# Static web front sources
-# MySQL
-# Nginx
-# ElasticSearch
+# This file is part of DocDokuPLM.
 #
+# DocDokuPLM is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# DocDokuPLM is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with DocDokuPLM.  If not, see <http://www.gnu.org/licenses/>.
+#
+# DocDokuPLM platform docker file
 
 version: '2'
 
@@ -16,8 +27,6 @@ services:
   front:
     build:
       context: ./front
-    volumes:
-      - ../docdoku-web-front/app:/usr/share/nginx/html    
     networks:
       - network
     ports:
@@ -35,8 +44,10 @@ services:
       args:       
         - DOCDOKU_PLM_CODEBASE=http://localhost:10080
     volumes:
-      - "./autodeploy:/opt/payara41/glassfish/domains/domain1/autodeploy"
-      - "./localdata/vault:/var/lib/docdoku/vault"
+      - "./volumes/autodeploy:/opt/payara41/glassfish/domains/domain1/autodeploy"
+      - "./volumes/vault:/var/lib/docdoku/vault"
+      - "./volumes/plugins:/opt/plugins"
+      - "./volumes/native-libs:/opt/native-libs"
     networks:
       - network
     ports:
@@ -48,7 +59,7 @@ services:
       - "db:db"
       - "es:es"
 
-  # Nginx global proxy 
+  # Nginx global proxy
   # The application will run at http://localhost:10080, change if needed
   proxy:
     depends_on:
@@ -65,8 +76,7 @@ services:
       - "10080:80"
     links:
       - "front:front"
-      - "back:back"    
-
+      - "back:back"
 
   # ElasticSearch instance
   es:
@@ -90,11 +100,19 @@ services:
   db:  
     build: ./db
     volumes:
-      - "./localdata/db:/var/lib/mysql"
+      - "./volumes/db:/var/lib/mysql"
     networks:
       - network
     ports:
       - "13306:3306"
+
+  # DocDokuPLM build env
+  build-env:
+    build: ./build-env
+    volumes:
+      - ./volumes/src:/src
+      - ./volumes/m2:/root/.m2
+      - ./volumes/npm:/root/.npm
 
 networks:
   network:

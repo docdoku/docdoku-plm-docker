@@ -4,68 +4,48 @@ This project aims to deploy a DocDokuPLM platform with docker-compose, for debug
 
 ## Installation
 
-### Requirements 
+Requirements
 
 * Docker
 * Docker Compose
-* DocDokuPLM server sources or an EAR file
-* DocDokuPLM web-front sources or build files
 
-You may need to install additional software to build from the sources, particullary:
+## platform-ctl
 
-* JDK 8
-* Maven
-* NodeJs
-* Git
+`platform-ctl` is a command wrapper that ease build, deployment and starting/stopping the whole software stack.
 
-### Build the base image
-	
-The first time can take a few minutes (system image build)
+First step is to clone the repositories and creating the base images. This may take a while, let's have a coffee break.
 
-	docker build -t docdokuplm:payara back/payara
+	./platform-ctrl init
 
-Prepare the folders before first launch
+Then it's time to compile some artifacts
 
-	mkdir -p {localdata/{db,vault},autodeploy/bundles}
+    ./platform-ctrl build
 
+Start the platform
 
-Download and extract web-front files and edit the compose file if needed
+	./platform-ctrl up
 
-	volumes:
-	      - ../docdoku-web-front/app:/usr/share/nginx/html
+Deploy some apps
 
-Launch the platform
+	cp ./volumes/src/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear ./volumes/autodeploy/
+	# cp ...
 
-	docker-compose up -d
+For more advanced commands, all `docker-compose' commands are supported. See https://docs.docker.com/compose/reference/ for full detail
 
-Copy the `docdoku-plm-ear.ear` file that you want to deploy in the `autodeploy` folder. 
+## Logging
 
+Output logs from all containers
 
-### Deploy from the source code
+	./platform-ctl logs
 
-Clone the source projects if not already done
+## Stop the app
 
-	git clone git@github.com:docdoku/docdoku-plm.git ../docdoku-plm
-	git clone git@github.com:docdoku/docdoku-web-front.git ../docdoku-web-front
-	
-You should have this structure
+This will shut down all containers
 
-	$ ls ..
-	docdoku-plm docdoku-plm-docker docdoku-web-front
-	
-Build the ear with maven and copy it in the autodeploy folder.
-
-	mvn -f ../docdoku-plm/pom.xml clean install
-	cp ../docdoku-plm/docdoku-server/docdoku-server-ear/target/docdoku-server-ear.ear autodeploy
-
-## Stop server
-
-	docker-compose down
+	./platform-ctl down
 
 ## Debugging
 
 Use the remote debug feature from your IDE. Debug port is 19009.
 
-	-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=19009
-
-
+Add to your remote target options `-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=19009`
