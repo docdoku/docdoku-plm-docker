@@ -19,23 +19,31 @@
 # along with DocDokuPLM.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-init () {
+dir () {
+     SOURCE="${BASH_SOURCE[0]}"
+     # While $SOURCE is a symlink, resolve it
+     while [ -h "$SOURCE" ]; do
+          DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+          SOURCE="$( readlink "$SOURCE" )"
+          # If $SOURCE was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
+          [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+     done
+     echo "$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+}
+
+SCRIPT_DIR="$(dir)"
+cd ${SCRIPT_DIR}
+
+init-repo () {
     echo "Running mkdir for volumes ..."
-    mkdir -p volumes
-    mkdir -p volumes/{db,vault,plugins,native-libs,m2,npm,web-front,autodeploy}
+    mkdir -p ${SCRIPT_DIR}/volumes
+    mkdir -p ${SCRIPT_DIR}/volumes/{db,vault,plugins,native-libs,m2,npm,autodeploy}
 
     # Clone all repositories
     echo "Cloning repositories ..."
-    git clone --single-branch -b develop https://github.com/polarsys/eplmp.git ./volumes/src/eplmp
-    git clone --single-branch -b dev https://github.com/docdoku/docdoku-plm.git ./volumes/src/docdoku-plm
-    git clone --single-branch -b dev https://github.com/docdoku/docdoku-web-front.git ./volumes/src/docdoku-web-front
-
-    # Build the base payara image with dependencies
-    echo "Building base image ..."
-    docker build -t docdokuplm:payara back/payara
-
-    echo "Building platform components..."
-    docker-compose build
+    git clone --single-branch -b develop https://github.com/polarsys/eplmp.git ${SCRIPT_DIR}/volumes/src/eplmp
+    git clone --single-branch -b dev https://github.com/docdoku/docdoku-plm.git ${SCRIPT_DIR}/volumes/src/docdoku-plm
+    git clone --single-branch -b dev https://github.com/docdoku/docdoku-web-front.git ${SCRIPT_DIR}/volumes/src/docdoku-web-front
 }
 
 down() {
@@ -48,17 +56,32 @@ up () {
     docker-compose up -d
 }
 
-build (){
+build-images (){
+    # Build the base payara image with dependencies
+    echo "Building base image ..."
+    docker build -t docdokuplm:payara ${SCRIPT_DIR}/back/payara
+
+    echo "Building platform components..."
+    docker-compose build
+}
+
+build-artifacts (){
     echo "Building artifacts ..."
     docker-compose run build-env bash -c "cd /src/docdoku-web-front && npm run build"
     docker-compose run build-env bash -c "cd /src/eplmp && mvn clean install"
     docker-compose run build-env bash -c "cd /src/docdoku-plm && mvn clean install"
 }
 
+datakit () {
+    docker-compose run build-env bash -c "cd /src/datakit-wrapper && mvn clean install"
+    docker-compose run build-env bash -c "cd /src/converter-catia && mvn clean install"
+    docker-compose run build-env bash -c "cd /src/converter-solidworks && mvn clean install"
+}
+
 deploy () {
     echo "Deploying artifacts ..."
-    rm -rf ./volumes/autodeploy/*
-    cp ./volumes/src/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear ./volumes/autodeploy/
+    rm -rf ${SCRIPT_DIR}/volumes/autodeploy/*
+    cp ${SCRIPT_DIR}/volumes/src/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear ${SCRIPT_DIR}/volumes/autodeploy/
     echo "Done"
 }
 
@@ -66,18 +89,50 @@ logs (){
     docker-compose logs -f
 }
 
+health (){
+    curl localhost:10080/eplmp-server-rest/api/platform/health
+}
+
+status () {
+    docker-compose images
+}
+
 
 usage () {
-    echo "Usage : platform-ctl <cmd>"
-    echo "  <cmd>: init/build/deploy/up/down/logs"
+
+    GREEN='\033[0;32m'
+    NC='\033[0m'
+    echo -e "${GREEN}DocDokuPLM${NC} platform-ctl"
+    echo -e "Version 0.0.1 \n"
+    echo -e "Usage : platform-ctl ${GREEN}<cmd>${NC}"
+    echo -e "  cmd: init-repo|build-images|build-artifacts|deploy|up|down|logs|health|status|help"
+    echo -e ""
+    echo -e "  ${GREEN}init-repo${NC}:         Init the repositories to ./volumes/src/"
+    echo -e "  ${GREEN}build-images${NC}:      Build the base docker image from docker-compose file"
+    echo -e "  ${GREEN}build-artifacts${NC}:   Build the main artifacts (eplmp-server-ear, converters, ...)"
+    echo -e "  ${GREEN}deploy${NC}:            Copy the main artifacts to the autodeploy volume"
+    echo -e "  ${GREEN}up${NC}:                Start the containers"
+    echo -e "  ${GREEN}down${NC}:              Stop the containers"
+    echo -e "  ${GREEN}logs${NC}:              Read the logs from all containers"
+    echo -e "  ${GREEN}health${NC}:            Run a health-check (webservice)"
+    echo -e "  ${GREEN}status${NC}:            Get a status of running images"
+    echo -e "  ${GREEN}help${NC}:              Display this lines"
+
+    echo -e "";
 }
 
 case "$1" in
-'build')
-    build
+'init-repo')
+   init-repo
     ;;
-'init')
-   init
+'build-images')
+   build-images
+    ;;
+'build-artifacts')
+    build-artifacts
+    ;;
+'datakit')
+    datakit
     ;;
 'deploy')
    deploy
@@ -91,6 +146,15 @@ case "$1" in
     ;;
 'logs')
     logs
+    ;;
+'health')
+    health
+    ;;
+'status')
+    status
+    ;;
+'help')
+    usage
     ;;
 *)
     usage

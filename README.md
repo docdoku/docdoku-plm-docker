@@ -15,11 +15,12 @@ Requirements
 
 First step is to clone the repositories and creating the base images. This may take a while, let's have a coffee break.
 
-	./platform-ctrl init
+	./platform-ctrl init-repo
+	./platform-ctrl build-images
 
 Then it's time to compile some artifacts
 
-    ./platform-ctrl build
+    ./platform-ctrl build-artifacts
 
 Start the platform
 
@@ -27,8 +28,15 @@ Start the platform
 
 Deploy some apps
 
-	cp ./volumes/src/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear ./volumes/autodeploy/
-	# cp ...
+	./platform-ctrl deploy
+
+Deploy some apps
+
+	./platform-ctrl deploy
+
+Get platform health
+
+	./platofrm-ctl heatlh
 
 For more advanced commands, all `docker-compose' commands are supported. See https://docs.docker.com/compose/reference/ for full detail
 
@@ -49,3 +57,7 @@ This will shut down all containers
 Use the remote debug feature from your IDE. Debug port is 19009.
 
 Add to your remote target options `-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=19009`
+
+## Notes
+
+`platform-ctl` can be symlinked or added to your PATH
