@@ -20,17 +20,20 @@
 #
 # Needed components:
 #
+# ubuntu 16.04
+# g++ 5
 # Java jdk8
 # Node >= 8.x
 # Maven 3
 # Linux toolchain
 
-FROM openjdk:8-jdk
+FROM ubuntu:16.04
 
 RUN \
-    curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
     apt-get update && \
-    apt-get install -y maven nodejs gcc make build-essential && \
+    apt-get install -y openjdk-8-jdk maven build-essential curl && \
+    curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
+    apt-get install -y nodejs && \
     npm install npm@6.1.0 -g
 
 # Allow dependency cache control
