@@ -109,18 +109,26 @@ deploy () {
 
     echo "Deploying artifacts ..."
 
-    # Back
-    rm -rf ${SCRIPT_DIR}/volumes/autodeploy/*
+    rm ${SCRIPT_DIR}/volumes/autodeploy/.autodeploystatus/*
+
+    # Server app
     cp ${SCRIPT_DIR}/volumes/src/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear ${SCRIPT_DIR}/volumes/autodeploy/
 
     # Plugins
     # Add converters, importers ... here
-    #
+
+    cp ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/
+    cp ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-dae/converter-dae-ear/target/converter-dae-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/
+    cp ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-ifc/converter-ifc-ear/target/converter-ifc-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/
+    cp ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/
+    cp ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/
+
+    cp ${SCRIPT_DIR}/volumes/src/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/
 
     # Front
-    rm -rf ${SCRIPT_DIR}/volumes/web-front/*
     cp -R ${SCRIPT_DIR}/volumes/src/docdoku-web-front/dist/* ${SCRIPT_DIR}/volumes/web-front/
     echo "Done"
+
 }
 
 logs (){
