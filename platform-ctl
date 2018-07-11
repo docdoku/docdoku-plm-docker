@@ -19,6 +19,13 @@
 # along with DocDokuPLM.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+EPLMP_SSH_URL=git@github.com:polarsys/eplmp.git
+EPLMP_HTTPS_URL=https://github.com/polarsys/eplmp.git
+DOCDOKU_PLM_SSH_URL=git@github.com:docdoku/docdoku-plm.git
+DOCDOKU_PLM_HTTPS_URL=https://github.com/docdoku/docdoku-plm.git
+DOCDOKU_WEB_FRONT_SSH_URL=git@github.com:docdoku/docdoku-web-front.git
+DOCDOKU_WEB_FRONT_HTTPS_URL=https://github.com/docdoku/docdoku-web-front.git
+
 dir () {
      SOURCE="${BASH_SOURCE[0]}"
      # While $SOURCE is a symlink, resolve it
@@ -33,17 +40,42 @@ dir () {
 
 SCRIPT_DIR="$(dir)"
 cd ${SCRIPT_DIR}
+ARGS=$@
 
 init-repo () {
-    echo "Running mkdir for volumes ..."
-    mkdir -p ${SCRIPT_DIR}/volumes
-    mkdir -p ${SCRIPT_DIR}/volumes/{db,vault,plugins,native-libs,m2,npm,autodeploy}
 
-    # Clone all repositories
-    echo "Cloning repositories ..."
-    git clone --single-branch -b develop https://github.com/polarsys/eplmp.git ${SCRIPT_DIR}/volumes/src/eplmp
-    git clone --single-branch -b dev https://github.com/docdoku/docdoku-plm.git ${SCRIPT_DIR}/volumes/src/docdoku-plm
-    git clone --single-branch -b dev https://github.com/docdoku/docdoku-web-front.git ${SCRIPT_DIR}/volumes/src/docdoku-web-front
+    echo "Preparing volumes ..."
+
+    mkdir -p ${SCRIPT_DIR}/volumes
+    mkdir -p ${SCRIPT_DIR}/volumes/{db,vault,plugins,native-libs,m2,npm,autodeploy,elasticsearch-data}
+
+    PROTOCOL="$1";
+
+    if [ -z "$PROTOCOL" ]
+      then
+        echo "No protocol supplied, using https"
+        PROTOCOL=https
+    fi
+
+    if [ "$PROTOCOL" == "ssh" ] || [  "$PROTOCOL" == "https" ] ; then
+        echo "Cloning ${PROTOCOL} repositories ..."
+    else
+        echo "Sorry protocol $PROTOCOL is not available"
+        usage
+        exit -1
+    fi
+
+    if [ "$PROTOCOL" == "ssh" ]  ; then
+        git clone --single-branch -b develop ${EPLMP_SSH_URL} ${SCRIPT_DIR}/volumes/src/eplmp
+        git clone --single-branch -b dev ${DOCDOKU_PLM_SSH_URL} ${SCRIPT_DIR}/volumes/src/docdoku-plm
+        git clone --single-branch -b dev ${DOCDOKU_WEB_FRONT_SSH_URL} ${SCRIPT_DIR}/volumes/src/docdoku-web-front
+    else
+        git clone --single-branch -b develop ${EPLMP_HTTPS_URL} ${SCRIPT_DIR}/volumes/src/eplmp
+        git clone --single-branch -b dev ${DOCDOKU_PLM_HTTPS_URL} ${SCRIPT_DIR}/volumes/src/docdoku-plm
+        git clone --single-branch -b dev ${DOCDOKU_WEB_FRONT_HTTPS_URL} ${SCRIPT_DIR}/volumes/src/docdoku-web-front
+    fi
+
+
 }
 
 down() {
@@ -67,21 +99,27 @@ build-images (){
 
 build-artifacts (){
     echo "Building artifacts ..."
-    docker-compose run build-env bash -c "cd /src/docdoku-web-front && npm run build"
-    docker-compose run build-env bash -c "cd /src/eplmp && mvn clean install"
-    docker-compose run build-env bash -c "cd /src/docdoku-plm && mvn clean install"
-}
-
-datakit () {
-    docker-compose run build-env bash -c "cd /src/datakit-wrapper && mvn clean install"
-    docker-compose run build-env bash -c "cd /src/converter-catia && mvn clean install"
-    docker-compose run build-env bash -c "cd /src/converter-solidworks && mvn clean install"
+    docker-compose run build-env bash -c "cd /src/docdoku-web-front && npm run build --unsafe-perm --quiet"
+    docker-compose run build-env bash -c "cd /src/docdoku-plm/docdoku-api && npm install --unsafe-perm --quiet"
+    docker-compose run build-env bash -c "mvn clean install -f /src/eplmp/pom.xml"
+    docker-compose run build-env bash -c "mvn clean install -f /src/docdoku-plm/pom.xml"
 }
 
 deploy () {
+
     echo "Deploying artifacts ..."
+
+    # Back
     rm -rf ${SCRIPT_DIR}/volumes/autodeploy/*
     cp ${SCRIPT_DIR}/volumes/src/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear ${SCRIPT_DIR}/volumes/autodeploy/
+
+    # Plugins
+    # Add converters, importers ... here
+    #
+
+    # Front
+    rm -rf ${SCRIPT_DIR}/volumes/web-front/*
+    cp -R ${SCRIPT_DIR}/volumes/src/docdoku-web-front/dist/* ${SCRIPT_DIR}/volumes/web-front/
     echo "Done"
 }
 
@@ -97,6 +135,18 @@ status () {
     docker-compose images
 }
 
+run() {
+
+    cmd="$*"
+    if [ -z "$cmd" ]
+      then
+        echo "No command supplied"
+        usage
+        exit -1
+    fi
+    echo "Running $cmd ..."
+    docker-compose run build-env bash -c "$cmd"
+}
 
 usage () {
 
@@ -104,35 +154,34 @@ usage () {
     NC='\033[0m'
     echo -e "${GREEN}DocDokuPLM${NC} platform-ctl"
     echo -e "Version 0.0.1 \n"
-    echo -e "Usage : platform-ctl ${GREEN}<cmd>${NC}"
-    echo -e "  cmd: init-repo|build-images|build-artifacts|deploy|up|down|logs|health|status|help"
+    echo -e "   Usage: ${GREEN} platform-ctl <command> [arguments]${NC} "
     echo -e ""
-    echo -e "  ${GREEN}init-repo${NC}:         Init the repositories to ./volumes/src/"
-    echo -e "  ${GREEN}build-images${NC}:      Build the base docker image from docker-compose file"
-    echo -e "  ${GREEN}build-artifacts${NC}:   Build the main artifacts (eplmp-server-ear, converters, ...)"
-    echo -e "  ${GREEN}deploy${NC}:            Copy the main artifacts to the autodeploy volume"
-    echo -e "  ${GREEN}up${NC}:                Start the containers"
-    echo -e "  ${GREEN}down${NC}:              Stop the containers"
-    echo -e "  ${GREEN}logs${NC}:              Read the logs from all containers"
-    echo -e "  ${GREEN}health${NC}:            Run a health-check (webservice)"
-    echo -e "  ${GREEN}status${NC}:            Get a status of running images"
-    echo -e "  ${GREEN}help${NC}:              Display this lines"
+    echo -e "Available commands:"
+    echo -e ""
+    echo -e "  ${GREEN}init-repo [<ssh|https>]${NC}: Init the repositories to ./volumes/src/"
+    echo -e "  ${GREEN}build-images${NC}:            Build the base docker image from docker-compose file"
+    echo -e "  ${GREEN}build-artifacts${NC}:         Build the main artifacts (eplmp-server-ear, converters, ...)"
+    echo -e "  ${GREEN}deploy${NC}:                  Copy the main artifacts to the autodeploy volume"
+    echo -e "  ${GREEN}up${NC}:                      Start the containers"
+    echo -e "  ${GREEN}down${NC}:                    Stop the containers"
+    echo -e "  ${GREEN}logs${NC}:                    Read the logs from all containers"
+    echo -e "  ${GREEN}health${NC}:                  Run a health-check (webservice)"
+    echo -e "  ${GREEN}status${NC}:                  Get a status of running images"
+    echo -e "  ${GREEN}run \"command\"${NC}:           Run a custom command in build env"
+    echo -e "  ${GREEN}help${NC}:                    Display this lines"
 
     echo -e "";
 }
 
 case "$1" in
 'init-repo')
-   init-repo
+   init-repo $2
     ;;
 'build-images')
    build-images
     ;;
 'build-artifacts')
     build-artifacts
-    ;;
-'datakit')
-    datakit
     ;;
 'deploy')
    deploy
@@ -155,6 +204,9 @@ case "$1" in
     ;;
 'help')
     usage
+    ;;
+'run')
+    run $2
     ;;
 *)
     usage
