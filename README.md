@@ -40,7 +40,7 @@ Get platform health
 
 	./platofrm-ctl heatlh
 
-For more advanced commands, all `docker-compose' commands are supported. See https://docs.docker.com/compose/reference/ for full detail
+For more advanced commands, all `docker-compose` commands are supported. See https://docs.docker.com/compose/reference/ for full detail
 
 ## Logging
 
