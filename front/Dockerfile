@@ -24,15 +24,7 @@ ENV NGINX_PORT 3000
 COPY default.conf /etc/nginx/conf.d/default.conf
 
 # Expose volumes
-#VOLUME ["/usr/share/nginx/html", "/var/log/nginx"]
-
-RUN apk --no-cache add wget
-
-RUN \
-    wget --quiet -O /tmp/docdoku-web-front.zip http://codeci.docdoku.net/job/docdoku-web-front-dev/lastStableBuild/artifact/target/docdoku-web-front.zip && \
-    unzip -o -qq /tmp/docdoku-web-front.zip -d /usr/share/nginx/html
-
-RUN chmod -R o+rx /usr/share/nginx/html
+VOLUME ["/usr/share/nginx/html", "/var/log/nginx"]
 
 # Expose ports
 EXPOSE 3000
