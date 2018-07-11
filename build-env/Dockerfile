@@ -30,7 +30,8 @@ FROM openjdk:8-jdk
 RUN \
     curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
     apt-get update && \
-    apt-get install -y maven nodejs gcc make build-essential
+    apt-get install -y maven nodejs gcc make build-essential && \
+    npm install npm@6.1.0 -g
 
 # Allow dependency cache control
 VOLUME ["/src", "/root/.m2", "/root/.npm"]
