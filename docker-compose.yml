@@ -31,7 +31,8 @@ services:
       - network
     ports:
       - "13000:3000"
-
+    volumes:
+      - ./volumes/web-front:/usr/share/nginx/html
   # Payara instance - JEE application server
   # Settings:
   #  - DOCDOKU_PLM_CODEBASE : Web front address
@@ -80,7 +81,7 @@ services:
 
   # ElasticSearch instance
   es:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.4.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.10
     environment:
       - cluster.name=docdokuplm
       - bootstrap.memory_lock=true
@@ -95,6 +96,8 @@ services:
     ports:      
       - "19200:9200"
       - "19300:9300"
+    volumes:
+      - ./volumes/elasticsearch-data:/usr/share/elasticsearch/data
 
   # MySQL instance
   db:  
