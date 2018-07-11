@@ -54,7 +54,6 @@ ENV NATIVE_LIBS /opt/native-libs
 ENV SOLIDWORKS_LICENSE_PATH /opt/plugins/solidworks/license.txt
 ENV SOLIDWORKS_SCHEMA_PATH /opt/plugins/solidworks/schema
 ENV CATIA_LICENSE_PATH /opt/plugins/catia/license.txt
-ENV CATIA_SCHEMA_PATH /opt/plugins/catia/schema
 
 RUN \
  keytool -genseckey -storetype JCEKS -keyalg AES -keysize 256 -keystore ${KEYSTORE_LOCATION} -storepass ${KEYSTORE_PASS} -keypass ${KEYSTORE_KEY_PASS}
@@ -108,7 +107,6 @@ EOF\n'\
  ${ASADMIN_PATH}/asadmin --user admin  --passwordfile=/opt/pwdfile create-custom-resource --restype java.lang.String --factoryclass org.glassfish.resources.custom.factory.PrimitivesAndStringFactory --property value=${SOLIDWORKS_LICENSE_PATH} datakit/solidworks/licensePath && \
  ${ASADMIN_PATH}/asadmin --user admin  --passwordfile=/opt/pwdfile create-custom-resource --restype java.lang.String --factoryclass org.glassfish.resources.custom.factory.PrimitivesAndStringFactory --property value=${SOLIDWORKS_SCHEMA_PATH} datakit/solidworks/schemaDir && \
  ${ASADMIN_PATH}/asadmin --user admin  --passwordfile=/opt/pwdfile create-custom-resource --restype java.lang.String --factoryclass org.glassfish.resources.custom.factory.PrimitivesAndStringFactory --property value=${CATIA_LICENSE_PATH} datakit/catia/licensePath && \
- ${ASADMIN_PATH}/asadmin --user admin  --passwordfile=/opt/pwdfile create-custom-resource --restype java.lang.String --factoryclass org.glassfish.resources.custom.factory.PrimitivesAndStringFactory --property value=${CATIA_SCHEMA_PATH} datakit/catia/schemaDir && \
  ${ASADMIN_PATH}/asadmin --user admin  --passwordfile=/opt/pwdfile stop-domain && \
  rm /opt/pwdfile
 
