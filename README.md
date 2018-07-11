@@ -13,6 +13,8 @@ Requirements
 
 `platform-ctl` is a command wrapper that ease build, deployment and starting/stopping the whole software stack.
 
+Run `platform-ctl help` to list all commands
+
 First step is to clone the repositories and creating the base images. This may take a while, let's have a coffee break.
 
 	./platform-ctrl init-repo
@@ -30,9 +32,9 @@ Deploy some apps
 
 	./platform-ctrl deploy
 
-Deploy some apps
+List platform containers
 
-	./platform-ctrl deploy
+	./platform-ctrl status
 
 Get platform health
 
