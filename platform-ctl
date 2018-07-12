@@ -107,16 +107,27 @@ build-images (){
 
 build-artifacts (){
     echo "Building artifacts ..."
-    docker-compose run build-env bash -c "cd /src/docdoku-web-front && npm run build --unsafe-perm --quiet"
-    docker-compose run build-env bash -c "cd /src/docdoku-plm/docdoku-api && npm install --unsafe-perm --quiet"
-    docker-compose run build-env bash -c "mvn clean install --quiet -f /src/eplmp/pom.xml"
-    docker-compose run build-env bash -c "mvn clean install --quiet -f /src/docdoku-plm/pom.xml"
+    echo "docdoku-web-front ..." && \
+        docker-compose run build-env bash -c "cd /src/docdoku-web-front && npm run build --unsafe-perm --quiet" && \
+        echo "... done";
+
+    echo "docdoku-api ..." && \
+        docker-compose run build-env bash -c "cd /src/docdoku-plm/docdoku-api && npm install --unsafe-perm --quiet" && \
+        echo "... done";
+
+    echo "eplmp ..." && \
+        docker-compose run build-env bash -c "mvn clean install --quiet -f /src/eplmp/pom.xml" && \
+        echo "... done";
+
+    echo "docodku-plm ..." && \
+        docker-compose run build-env bash -c "mvn clean install --quiet -f /src/docdoku-plm/pom.xml" && \
+        echo "... done";
 }
 
 deploy () {
     echo "Deploying artifacts ..."
 
-    rm "${SCRIPT_DIR}/volumes/autodeploy/.autodeploystatus/*"
+    rm -rf "${SCRIPT_DIR}/volumes/autodeploy/.autodeploystatus"
 
     # Server app
     cp "${SOURCES_DIR}/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear" "${SCRIPT_DIR}/volumes/autodeploy/"
@@ -138,16 +149,17 @@ deploy () {
     echo "Done"
 }
 
-stat-deploy () {
+verify-artifacts () {
 
     echo "Verifying artifacts ..."
-    md5 "${SOURCES_DIR}/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear"
-    md5 "${SOURCES_DIR}/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5-SNAPSHOT.ear"
-    md5 "${SOURCES_DIR}/docdoku-plm/converter-dae/converter-dae-ear/target/converter-dae-ear-2.5-SNAPSHOT.ear"
-    md5 "${SOURCES_DIR}/docdoku-plm/converter-ifc/converter-ifc-ear/target/converter-ifc-ear-2.5-SNAPSHOT.ear"
-    md5 "${SOURCES_DIR}/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5-SNAPSHOT.ear"
-    md5 "${SOURCES_DIR}/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5-SNAPSHOT.ear"
-    md5 "${SOURCES_DIR}/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear"
+    docker-compose run build-env md5sum "/src/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear"
+    docker-compose run build-env md5sum "/src/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5-SNAPSHOT.ear"
+    docker-compose run build-env md5sum "/src/docdoku-plm/converter-dae/converter-dae-ear/target/converter-dae-ear-2.5-SNAPSHOT.ear"
+    docker-compose run build-env md5sum "/src/docdoku-plm/converter-ifc/converter-ifc-ear/target/converter-ifc-ear-2.5-SNAPSHOT.ear"
+    docker-compose run build-env md5sum "/src/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5-SNAPSHOT.ear"
+    docker-compose run build-env md5sum "/src/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5-SNAPSHOT.ear"
+    docker-compose run build-env md5sum "/src/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear"
+
     stat "${SOURCES_DIR}/docdoku-web-front/dist"
     stat "${SOURCES_DIR}/docdoku-web-front/app"
 }
@@ -262,7 +274,7 @@ case "$1" in
     build-artifacts
     ;;
 "deploy")
-   stat-deploy
+   verify-artifacts
    deploy
     ;;
 "up")
