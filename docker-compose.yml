@@ -48,6 +48,7 @@ services:
       args:       
         - DOCDOKU_PLM_CODEBASE=http://localhost:10080
         - HEAP_SIZE=2g
+        - AS_ADMIN_PASSWORD=changeit
     volumes:
       - "./volumes/autodeploy:/opt/payara41/glassfish/domains/domain1/autodeploy"
       - "./volumes/vault:/var/lib/docdoku/vault"
