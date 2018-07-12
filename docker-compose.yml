@@ -25,6 +25,7 @@ services:
   # Web front: nginx server on host source files  
   # volumes: static files from web front source on the host.
   front:
+    container_name: docdoku-plm-docker_front
     build:
       context: ./front
     networks:
@@ -37,6 +38,7 @@ services:
   # Settings:
   #  - DOCDOKU_PLM_CODEBASE : Web front address
   back:
+    container_name: docdoku-plm-docker_back
     depends_on:
       - db
       - es
@@ -63,6 +65,7 @@ services:
   # Nginx global proxy
   # The application will run at http://localhost:10080, change if needed
   proxy:
+    container_name: docdoku-plm-docker_proxy
     depends_on:
       - front
       - back
@@ -79,6 +82,7 @@ services:
 
   # ElasticSearch instance
   es:
+    container_name: docdoku-plm-docker_es
     image: docker.elastic.co/elasticsearch/elasticsearch:5.6.10
     environment:
       - cluster.name=docdokuplm
@@ -98,7 +102,8 @@ services:
       - ./volumes/elasticsearch-data:/usr/share/elasticsearch/data
 
   # MySQL instance
-  db:  
+  db:
+    container_name: docdoku-plm-docker_db
     build: ./db
     volumes:
       - "./volumes/db:/var/lib/mysql"
@@ -109,6 +114,7 @@ services:
 
   # DocDokuPLM build env
   build-env:
+    container_name: docdoku-plm-docker_build-env
     build: ./build-env
     volumes:
       - ./volumes/src:/src
