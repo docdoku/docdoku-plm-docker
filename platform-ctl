@@ -19,7 +19,7 @@
 # along with DocDokuPLM.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-SCRIPT_VERSION=0.0.2
+SCRIPT_VERSION=0.0.3
 
 # Repositories
 EPLMP_SSH_URL=git@github.com:polarsys/eplmp.git
@@ -136,6 +136,20 @@ deploy () {
 
 }
 
+stat-deploy () {
+
+    echo "Verifying artifacts ..."
+    md5 ${SCRIPT_DIR}/volumes/src/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear
+    md5 ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5-SNAPSHOT.ear
+    md5 ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-dae/converter-dae-ear/target/converter-dae-ear-2.5-SNAPSHOT.ear
+    md5 ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-ifc/converter-ifc-ear/target/converter-ifc-ear-2.5-SNAPSHOT.ear
+    md5 ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5-SNAPSHOT.ear
+    md5 ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5-SNAPSHOT.ear
+    md5 ${SCRIPT_DIR}/volumes/src/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear
+    stat ${SCRIPT_DIR}/volumes/src/docdoku-web-front/dist
+    stat ${SCRIPT_DIR}/volumes/src/docdoku-web-front/app
+}
+
 logs (){
     docker-compose logs -f
 }
@@ -243,6 +257,7 @@ case "$1" in
     build-artifacts
     ;;
 'deploy')
+   stat-deploy
    deploy
     ;;
 'up')
