@@ -54,8 +54,8 @@ cd "${SCRIPT_DIR}" || quit "ERROR: Cannot find platform-ctl home directory" -1
 
 init-volumes () {
     echo "Preparing volumes ..."
-    mkdir -p "${SCRIPT_DIR}/volumes"
-    mkdir -p "${SCRIPT_DIR}/volumes/{db,vault,plugins,native-libs,m2,npm,autodeploy,elasticsearch-data,web-front/{app,dist}}"
+    mkdir -p "${SCRIPT_DIR}"/volumes
+    mkdir -p "${SCRIPT_DIR}"/volumes/{db,vault,plugins,native-libs,m2,npm,autodeploy,elasticsearch-data,web-front/{app,dist}}
 }
 
 init-repo () {
