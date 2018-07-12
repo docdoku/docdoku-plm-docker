@@ -21,7 +21,7 @@
 FROM mysql:5.7.15
 
 ENV MYSQL_DATABASE=docdokuplm \
-    MYSQL_ROOT_PASSWORD=password
+    MYSQL_ROOT_PASSWORD=changeit
 
 # Add to init scripts
 ADD init.sql /docker-entrypoint-initdb.d

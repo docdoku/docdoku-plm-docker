@@ -19,6 +19,9 @@
 # along with DocDokuPLM.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+SCRIPT_VERSION=0.0.2
+
+# Repositories
 EPLMP_SSH_URL=git@github.com:polarsys/eplmp.git
 EPLMP_HTTPS_URL=https://github.com/polarsys/eplmp.git
 DOCDOKU_PLM_SSH_URL=git@github.com:docdoku/docdoku-plm.git
@@ -26,6 +29,7 @@ DOCDOKU_PLM_HTTPS_URL=https://github.com/docdoku/docdoku-plm.git
 DOCDOKU_WEB_FRONT_SSH_URL=git@github.com:docdoku/docdoku-web-front.git
 DOCDOKU_WEB_FRONT_HTTPS_URL=https://github.com/docdoku/docdoku-web-front.git
 
+# Resolve script dir (may be a symlink or sourced script)
 dir () {
      SOURCE="${BASH_SOURCE[0]}"
      # While $SOURCE is a symlink, resolve it
@@ -139,8 +143,20 @@ health (){
     curl localhost:10080/eplmp-server-rest/api/platform/health
 }
 
+list-apps (){
+    docker exec -it docdoku-plm-docker_back_1 bash -c "/opt/payara41/bin/asadmin --user=admin list-applications"
+}
+
 status () {
     docker-compose images
+    echo -e ""
+    echo -e "To run a command on a container:"
+    echo -e "    docker exec -it <id or name> bash -c \"<command>\""
+    echo -e ""
+    echo -e "---------------------------------------------------"
+    echo -e "Disk usage"
+    echo -e "Size    Path"
+    du -hs ${SCRIPT_DIR}/volumes/*
 }
 
 run() {
@@ -156,27 +172,56 @@ run() {
     docker-compose run build-env bash -c "$cmd"
 }
 
+create-admin () {
+   do-create-account $1 $2 admin
+}
+
+create-user (){
+    do-create-account $1 $2 users
+}
+
+do-create-account (){
+     docker exec -it docdoku-plm-docker_db_1 bash -c "mysql -u docdokuplm_user -D docdokuplm -p --execute=\" \
+           INSERT INTO docdokuplm.ACCOUNT VALUES ('$1', NOW(), '', 1, 'en', '$1', 'CET'); \
+           INSERT INTO docdokuplm.CREDENTIAL VALUES ('$1', MD5('$2')); \
+           INSERT INTO docdokuplm.USERGROUPMAPPING VALUES ('$1', '$3');\" \
+        "
+}
+
+sql () {
+     docker exec -it docdoku-plm-docker_db_1 bash -c "mysql -u docdokuplm_user -D docdokuplm -p"
+}
+
+browser () {
+    open http://localhost:10080
+}
+
 usage () {
 
     GREEN='\033[0;32m'
     NC='\033[0m'
     echo -e "${GREEN}DocDokuPLM${NC} platform-ctl"
-    echo -e "Version 0.0.1 \n"
+    echo -e "   Version ${SCRIPT_VERSION}"
     echo -e "   Usage: ${GREEN} platform-ctl <command> [arguments]${NC} "
     echo -e ""
     echo -e "Available commands:"
     echo -e ""
-    echo -e "  ${GREEN}init-repo [<ssh|https>]${NC}: Init the repositories to ./volumes/src/"
-    echo -e "  ${GREEN}build-images${NC}:            Build the base docker image from docker-compose file"
-    echo -e "  ${GREEN}build-artifacts${NC}:         Build the main artifacts (eplmp-server-ear, converters, ...)"
-    echo -e "  ${GREEN}deploy${NC}:                  Copy the main artifacts to the autodeploy volume"
-    echo -e "  ${GREEN}up${NC}:                      Start the containers"
-    echo -e "  ${GREEN}down${NC}:                    Stop the containers"
-    echo -e "  ${GREEN}logs${NC}:                    Read the logs from all containers"
-    echo -e "  ${GREEN}health${NC}:                  Run a health-check (webservice)"
-    echo -e "  ${GREEN}status${NC}:                  Get a status of running images"
-    echo -e "  ${GREEN}run \"command\"${NC}:           Run a custom command in build env"
-    echo -e "  ${GREEN}help${NC}:                    Display this lines"
+    echo -e "  ${GREEN}init-repo [<ssh|https>]${NC}:     Init the repositories to ./volumes/src/"
+    echo -e "  ${GREEN}build-images${NC}:                Build the base docker images from docker-compose file"
+    echo -e "  ${GREEN}build-artifacts${NC}:             Build the main artifacts from eplmp nd docdoku-plm sources"
+    echo -e "  ${GREEN}deploy${NC}:                      Copy the main artifacts to the autodeploy volume"
+    echo -e "  ${GREEN}up${NC}:                          Start the containers"
+    echo -e "  ${GREEN}down${NC}:                        Stop the containers"
+    echo -e "  ${GREEN}status${NC}:                      Get a status of running images"
+    echo -e "  ${GREEN}health${NC}:                      Run a health-check (webservice)"
+    echo -e "  ${GREEN}apps${NC}:                        List currently deployed applications"
+    echo -e "  ${GREEN}logs${NC}:                        Read the logs from all containers"
+    echo -e "  ${GREEN}sql${NC}:                         Connect to local mysql database"
+    echo -e "  ${GREEN}create-admin <login> <pwd>${NC}:  Create a new administrator"
+    echo -e "  ${GREEN}create-user <login> <pwd>${NC}:   Create a new user"
+    echo -e "  ${GREEN}browser${NC}:                     Open your web browser and reach DocDokuPLM"
+    echo -e "  ${GREEN}run \"command\"${NC}:               Run a custom command in build env"
+    echo -e "  ${GREEN}help${NC}:                        Display this lines"
 
     echo -e "";
 }
@@ -201,6 +246,12 @@ case "$1" in
 'down')
     down
     ;;
+'create-admin')
+    create-admin $2 $3
+    ;;
+'create-user')
+    create-user $2 $3
+    ;;
 'logs')
     logs
     ;;
@@ -210,11 +261,20 @@ case "$1" in
 'status')
     status
     ;;
+'apps')
+    list-apps
+    ;;
 'help')
     usage
     ;;
 'run')
     run $2
+    ;;
+'sql')
+    sql
+    ;;
+'browser')
+    browser
     ;;
 *)
     usage

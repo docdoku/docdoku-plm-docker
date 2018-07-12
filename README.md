@@ -15,6 +15,8 @@ Requirements
 
 Run `platform-ctl help` to list all commands
 
+### Init the platform
+
 First step is to clone the repositories and to create the base images. This may take a while, let's have a coffee break.
 
 	./platform-ctrl init-repo
@@ -32,34 +34,59 @@ Deploy the artifacts
 
 	./platform-ctrl deploy
 
-List platform containers
+For more advanced commands, all `docker-compose` commands are supported. See https://docs.docker.com/compose/reference/ for full details
 
-	./platform-ctrl status
+### Logging and monitoring
 
 Get platform health
 
 	./platofrm-ctl heatlh
 
-For more advanced commands, all `docker-compose` commands are supported. See https://docs.docker.com/compose/reference/ for full details
+List platform containers
 
-## Logging
+	./platform-ctrl status
 
 Output logs from all containers
 
 	./platform-ctl logs
 
-## Stop the app
+### Build env commands
+
+You can run any command in the build env with
+
+	./platform-ctl run "<command>"
+
+Example
+
+	./platform-ctl run "mvn clean install -f /src/docdoku-plm"
+
+Look at the `build-env/Dockerfile` for more details on the system
+
+### SQL Management
+
+You can create an admin account, or users accounts
+
+	./platform-ctl create-user demo changeit
+	./platform-ctl create-admin root supersecret
+
+You can also directly connect to the sql instance
+
+	./platform-ctl sql
+
+You will be prompt for your MySQL password (See `db/init.sql`)
+
+### Stop the app
 
 This will shut down all containers
 
 	./platform-ctl down
 
-## Debugging
+### Debugging
 
 Use the remote debug feature from your IDE. Debug port is 19009.
 
 Add to your remote target options `-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=19009`
 
-## Notes
+### Notes
 
 `platform-ctl` can be symlinked or added to your PATH
