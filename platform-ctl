@@ -51,7 +51,7 @@ init-repo () {
     echo "Preparing volumes ..."
 
     mkdir -p ${SCRIPT_DIR}/volumes
-    mkdir -p ${SCRIPT_DIR}/volumes/{db,vault,plugins,native-libs,m2,npm,autodeploy,elasticsearch-data}
+    mkdir -p ${SCRIPT_DIR}/volumes/{db,vault,plugins,native-libs,m2,npm,autodeploy,elasticsearch-data,web-front/{app,dist}}
 
     PROTOCOL="$1";
 
@@ -105,8 +105,8 @@ build-artifacts (){
     echo "Building artifacts ..."
     docker-compose run build-env bash -c "cd /src/docdoku-web-front && npm run build --unsafe-perm --quiet"
     docker-compose run build-env bash -c "cd /src/docdoku-plm/docdoku-api && npm install --unsafe-perm --quiet"
-    docker-compose run build-env bash -c "mvn clean install -f /src/eplmp/pom.xml"
-    docker-compose run build-env bash -c "mvn clean install -f /src/docdoku-plm/pom.xml"
+    docker-compose run build-env bash -c "mvn clean install --quiet -f /src/eplmp/pom.xml"
+    docker-compose run build-env bash -c "mvn clean install --quiet -f /src/docdoku-plm/pom.xml"
 }
 
 deploy () {
@@ -130,7 +130,8 @@ deploy () {
     cp ${SCRIPT_DIR}/volumes/src/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/
 
     # Front
-    cp -R ${SCRIPT_DIR}/volumes/src/docdoku-web-front/dist/* ${SCRIPT_DIR}/volumes/web-front/
+    cp -R ${SCRIPT_DIR}/volumes/src/docdoku-web-front/dist ${SCRIPT_DIR}/volumes/web-front/
+    cp -R ${SCRIPT_DIR}/volumes/src/docdoku-web-front/app ${SCRIPT_DIR}/volumes/web-front/
     echo "Done"
 
 }
@@ -193,7 +194,12 @@ sql () {
 }
 
 browser () {
-    open http://localhost:10080
+    if [ "$1" == "dev" ]
+        then
+        open http://localhost:10081
+    else
+        open http://localhost:10080
+    fi
 }
 
 usage () {
@@ -274,7 +280,7 @@ case "$1" in
     sql
     ;;
 'browser')
-    browser
+    browser $2
     ;;
 *)
     usage
