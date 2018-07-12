@@ -109,19 +109,15 @@ build-artifacts (){
     echo "Building artifacts ..."
     echo "docdoku-web-front ..." && \
         docker-compose run build-env bash -c "cd /src/docdoku-web-front && npm run build --unsafe-perm --quiet" && \
-        echo "... done";
-
-    echo "docdoku-api ..." && \
-        docker-compose run build-env bash -c "cd /src/docdoku-plm/docdoku-api && npm install --unsafe-perm --quiet" && \
-        echo "... done";
+        echo "... done" && \
 
     echo "eplmp ..." && \
         docker-compose run build-env bash -c "mvn clean install --quiet -f /src/eplmp/pom.xml" && \
-        echo "... done";
+        echo "... done" && \
 
     echo "docodku-plm ..." && \
         docker-compose run build-env bash -c "mvn clean install --quiet -f /src/docdoku-plm/pom.xml" && \
-        echo "... done";
+        echo "... done"
 }
 
 deploy () {
@@ -259,7 +255,7 @@ usage () {
     echo -e "  ${GREEN}run \"command\"${NC}:               Run a custom command in build env"
     echo -e "  ${GREEN}help${NC}:                        Display this lines"
 
-    echo -e "";
+    echo -e ""
 }
 
 case "$1" in
