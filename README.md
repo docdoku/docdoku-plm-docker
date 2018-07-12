@@ -21,20 +21,20 @@ First step is to clone the repositories and to create the base images. This may 
 
 You can clone with ssh or https (default).
 
-	./platform-ctrl init-repo [ssh|https]
-	./platform-ctrl build-images
+	./platform-ctl init-repo [ssh|https]
+	./platform-ctl build-images
 
 Then it's time to package some artifacts
 
-    ./platform-ctrl build-artifacts
+    ./platform-ctl build-artifacts
 
 Start the platform
 
-	./platform-ctrl up
+	./platform-ctl up
 
 Deploy the artifacts
 
-	./platform-ctrl deploy
+	./platform-ctl deploy
 
 Launch your browser once artifacts are all deployed
 
@@ -48,7 +48,7 @@ Get platform health
 
 List platform containers
 
-	./platform-ctrl status
+	./platform-ctl status
 
 Output logs from all containers
 
