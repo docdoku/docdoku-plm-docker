@@ -39,21 +39,27 @@ dir () {
           # If $SOURCE was a relative symlink (so no "/" as prefix, need to resolve it relative to the symlink base directory
           [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
      done
-     echo "$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+     cd -P "$( dirname "$SOURCE" )" && pwd
 }
 
 SCRIPT_DIR="$(dir)"
-cd ${SCRIPT_DIR}
-ARGS=$@
+SOURCES_DIR="${SCRIPT_DIR}/volumes/src"
+
+quit () {
+    echo "$1"
+    exit "$2"
+}
+
+cd "${SCRIPT_DIR}" || quit "ERROR: Cannot find platform-ctl home directory" -1
+
+init-volumes () {
+    echo "Preparing volumes ..."
+    mkdir -p "${SCRIPT_DIR}/volumes"
+    mkdir -p "${SCRIPT_DIR}/volumes/{db,vault,plugins,native-libs,m2,npm,autodeploy,elasticsearch-data,web-front/{app,dist}}"
+}
 
 init-repo () {
-
-    echo "Preparing volumes ..."
-
-    mkdir -p ${SCRIPT_DIR}/volumes
-    mkdir -p ${SCRIPT_DIR}/volumes/{db,vault,plugins,native-libs,m2,npm,autodeploy,elasticsearch-data,web-front/{app,dist}}
-
-    PROTOCOL="$1";
+    PROTOCOL="$1"
 
     if [ -z "$PROTOCOL" ]
       then
@@ -70,16 +76,14 @@ init-repo () {
     fi
 
     if [ "$PROTOCOL" == "ssh" ]  ; then
-        git clone --single-branch -b develop ${EPLMP_SSH_URL} ${SCRIPT_DIR}/volumes/src/eplmp
-        git clone --single-branch -b dev ${DOCDOKU_PLM_SSH_URL} ${SCRIPT_DIR}/volumes/src/docdoku-plm
-        git clone --single-branch -b dev ${DOCDOKU_WEB_FRONT_SSH_URL} ${SCRIPT_DIR}/volumes/src/docdoku-web-front
+        git clone --single-branch -b develop "${EPLMP_SSH_URL}" "${SOURCES_DIR}/eplmp"
+        git clone --single-branch -b dev "${DOCDOKU_PLM_SSH_URL}" "${SOURCES_DIR}/docdoku-plm"
+        git clone --single-branch -b dev "${DOCDOKU_WEB_FRONT_SSH_URL}" "${SOURCES_DIR}/docdoku-web-front"
     else
-        git clone --single-branch -b develop ${EPLMP_HTTPS_URL} ${SCRIPT_DIR}/volumes/src/eplmp
-        git clone --single-branch -b dev ${DOCDOKU_PLM_HTTPS_URL} ${SCRIPT_DIR}/volumes/src/docdoku-plm
-        git clone --single-branch -b dev ${DOCDOKU_WEB_FRONT_HTTPS_URL} ${SCRIPT_DIR}/volumes/src/docdoku-web-front
+        git clone --single-branch -b develop "${EPLMP_HTTPS_URL}" "${SOURCES_DIR}/eplmp"
+        git clone --single-branch -b dev "${DOCDOKU_PLM_HTTPS_URL}" "${SOURCES_DIR}/docdoku-plm"
+        git clone --single-branch -b dev "${DOCDOKU_WEB_FRONT_HTTPS_URL}" "${SOURCES_DIR}/docdoku-web-front"
     fi
-
-
 }
 
 down() {
@@ -95,7 +99,7 @@ up () {
 build-images (){
     # Build the base payara image with dependencies
     echo "Building base image ..."
-    docker build -t docdokuplm:payara ${SCRIPT_DIR}/back/payara
+    docker build -t docdokuplm:payara "${SCRIPT_DIR}/back/payara"
 
     echo "Building platform components..."
     docker-compose build
@@ -110,44 +114,42 @@ build-artifacts (){
 }
 
 deploy () {
-
     echo "Deploying artifacts ..."
 
-    rm ${SCRIPT_DIR}/volumes/autodeploy/.autodeploystatus/*
+    rm "${SCRIPT_DIR}/volumes/autodeploy/.autodeploystatus/*"
 
     # Server app
-    cp ${SCRIPT_DIR}/volumes/src/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear ${SCRIPT_DIR}/volumes/autodeploy/
+    cp "${SOURCES_DIR}/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear" "${SCRIPT_DIR}/volumes/autodeploy/"
 
     # Plugins
     # Add converters, importers ... here
 
-    cp ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/
-    cp ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-dae/converter-dae-ear/target/converter-dae-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/
-    cp ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-ifc/converter-ifc-ear/target/converter-ifc-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/
-    cp ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/
-    cp ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/
-
-    cp ${SCRIPT_DIR}/volumes/src/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/
+    cp "${SOURCES_DIR}/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/"
+    cp "${SOURCES_DIR}/docdoku-plm/converter-dae/converter-dae-ear/target/converter-dae-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/"
+    cp "${SOURCES_DIR}/docdoku-plm/converter-ifc/converter-ifc-ear/target/converter-ifc-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/"
+    cp "${SOURCES_DIR}/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/"
+    cp "${SOURCES_DIR}/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/"
+    cp "${SOURCES_DIR}/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/"
 
     # Front
-    cp -R ${SCRIPT_DIR}/volumes/src/docdoku-web-front/dist ${SCRIPT_DIR}/volumes/web-front/
-    cp -R ${SCRIPT_DIR}/volumes/src/docdoku-web-front/app ${SCRIPT_DIR}/volumes/web-front/
-    echo "Done"
+    cp -R "${SOURCES_DIR}/docdoku-web-front/dist" "${SCRIPT_DIR}/volumes/web-front/"
+    cp -R "${SOURCES_DIR}/docdoku-web-front/app" "${SCRIPT_DIR}/volumes/web-front/"
 
+    echo "Done"
 }
 
 stat-deploy () {
 
     echo "Verifying artifacts ..."
-    md5 ${SCRIPT_DIR}/volumes/src/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear
-    md5 ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5-SNAPSHOT.ear
-    md5 ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-dae/converter-dae-ear/target/converter-dae-ear-2.5-SNAPSHOT.ear
-    md5 ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-ifc/converter-ifc-ear/target/converter-ifc-ear-2.5-SNAPSHOT.ear
-    md5 ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5-SNAPSHOT.ear
-    md5 ${SCRIPT_DIR}/volumes/src/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5-SNAPSHOT.ear
-    md5 ${SCRIPT_DIR}/volumes/src/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear
-    stat ${SCRIPT_DIR}/volumes/src/docdoku-web-front/dist
-    stat ${SCRIPT_DIR}/volumes/src/docdoku-web-front/app
+    md5 "${SOURCES_DIR}/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear"
+    md5 "${SOURCES_DIR}/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5-SNAPSHOT.ear"
+    md5 "${SOURCES_DIR}/docdoku-plm/converter-dae/converter-dae-ear/target/converter-dae-ear-2.5-SNAPSHOT.ear"
+    md5 "${SOURCES_DIR}/docdoku-plm/converter-ifc/converter-ifc-ear/target/converter-ifc-ear-2.5-SNAPSHOT.ear"
+    md5 "${SOURCES_DIR}/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5-SNAPSHOT.ear"
+    md5 "${SOURCES_DIR}/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5-SNAPSHOT.ear"
+    md5 "${SOURCES_DIR}/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear"
+    stat "${SOURCES_DIR}/docdoku-web-front/dist"
+    stat "${SOURCES_DIR}/docdoku-web-front/app"
 }
 
 logs (){
@@ -171,7 +173,9 @@ status () {
     echo -e "---------------------------------------------------"
     echo -e "Disk usage"
     echo -e "Size    Path"
-    du -hs ${SCRIPT_DIR}/volumes/*
+    du -hs "${SCRIPT_DIR}/volumes/db"
+    du -hs "${SCRIPT_DIR}/volumes/elasticsearch-data"
+    du -hs "${SCRIPT_DIR}/volumes/vault"
 }
 
 run() {
@@ -188,11 +192,11 @@ run() {
 }
 
 create-admin () {
-   do-create-account $1 $2 admin
+   do-create-account "$1" "$2" "admin"
 }
 
 create-user (){
-    do-create-account $1 $2 users
+    do-create-account "$1" "$2" "users"
 }
 
 do-create-account (){
@@ -208,7 +212,7 @@ sql () {
 }
 
 browser () {
-    if [ "$1" == "dev" ]
+    if [ "$1" == "dev" ] ;
         then
         open http://localhost:10081
     else
@@ -247,55 +251,56 @@ usage () {
 }
 
 case "$1" in
-'init-repo')
-   init-repo $2
+"init-repo")
+   init-volumes
+   init-repo "$2"
     ;;
-'build-images')
+"build-images")
    build-images
     ;;
-'build-artifacts')
+"build-artifacts")
     build-artifacts
     ;;
-'deploy')
+"deploy")
    stat-deploy
    deploy
     ;;
-'up')
+"up")
     down && \
     up
     ;;
-'down')
+"down")
     down
     ;;
-'create-admin')
-    create-admin $2 $3
+"create-admin")
+    create-admin "$2" "$3"
     ;;
-'create-user')
-    create-user $2 $3
+"create-user")
+    create-user "$2" "$3"
     ;;
-'logs')
+"logs")
     logs
     ;;
-'health')
+"health")
     health
     ;;
-'status')
+"status")
     status
     ;;
-'apps')
+"apps")
     list-apps
     ;;
-'help')
+"help")
     usage
     ;;
-'run')
-    run $2
+"run")
+    run "$2"
     ;;
-'sql')
+"sql")
     sql
     ;;
-'browser')
-    browser $2
+"browser")
+    browser "$2"
     ;;
 *)
     usage
