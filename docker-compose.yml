@@ -34,6 +34,7 @@ services:
       - "13000:3000"
     volumes:
       - ./volumes/web-front:/usr/share/nginx/html
+
   # Payara instance - JEE application server
   # Settings:
   #  - DOCDOKU_PLM_CODEBASE : Web front address
@@ -46,6 +47,7 @@ services:
       context: ./back
       args:       
         - DOCDOKU_PLM_CODEBASE=http://localhost:10080
+        - HEAP_SIZE=2g
     volumes:
       - "./volumes/autodeploy:/opt/payara41/glassfish/domains/domain1/autodeploy"
       - "./volumes/vault:/var/lib/docdoku/vault"
@@ -57,7 +59,7 @@ services:
       - "18080:8080"
       - "14848:4848"
       - "19009:9009"
-      - "18686:8686"  
+      - "18686:8686"
     links:
       - "db:db"
       - "es:es"
@@ -69,6 +71,8 @@ services:
     depends_on:
       - front
       - back
+      - es
+      - kibana
     build:
       context: ./proxy
     networks:
@@ -76,9 +80,13 @@ services:
     ports:
       - "10080:10080"
       - "10081:10081"
+      - "10082:10082"
+      - "10083:10083"
     links:
       - "front:front"
       - "back:back"
+      - "es:es"
+      - "kibana:kibana"
 
   # ElasticSearch instance
   es:
@@ -100,6 +108,22 @@ services:
       - "19300:9300"
     volumes:
       - ./volumes/elasticsearch-data:/usr/share/elasticsearch/data
+
+  # Kibana instance
+  kibana:
+     container_name: docdoku-plm-docker_kibana
+     image: docker.elastic.co/kibana/kibana:5.6.10
+     environment:
+       - SERVER_NAME=kibana
+       - ELASTICSEARCH_URL=http://es:9200
+     networks:
+       - network
+     depends_on:
+       - es
+     ports:
+       - "5601:5601"
+     links:
+       - "es:es"
 
   # MySQL instance
   db:

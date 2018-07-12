@@ -98,49 +98,47 @@ up () {
 
 build-images (){
     # Build the base payara image with dependencies
-    echo "Building base image ..."
-    docker build -t docdokuplm:payara "${SCRIPT_DIR}/back/payara"
-
-    echo "Building platform components..."
-    docker-compose build
+    echo "Building base image ..." && \
+     docker build -t docdokuplm:payara "${SCRIPT_DIR}/back/payara" && \
+     echo "Building platform components..." && \
+     docker-compose build
 }
 
 build-artifacts (){
     echo "Building artifacts ..."
     echo "docdoku-web-front ..." && \
-        docker-compose run build-env bash -c "cd /src/docdoku-web-front && npm run build --unsafe-perm --quiet" && \
-        echo "... done" && \
+     docker-compose run build-env bash -c "cd /src/docdoku-web-front && npm run build --unsafe-perm --quiet" && \
+     echo "... done" && \
 
     echo "eplmp ..." && \
-        docker-compose run build-env bash -c "mvn clean install --quiet -f /src/eplmp/pom.xml" && \
-        echo "... done" && \
+     docker-compose run build-env bash -c "mvn clean install --quiet -f /src/eplmp/pom.xml" && \
+     echo "... done" && \
 
     echo "docodku-plm ..." && \
-        docker-compose run build-env bash -c "mvn clean install --quiet -f /src/docdoku-plm/pom.xml" && \
-        echo "... done"
+     docker-compose run build-env bash -c "mvn clean install --quiet -f /src/docdoku-plm/pom.xml" && \
+     echo "... done"
 }
 
 deploy () {
     echo "Deploying artifacts ..."
 
-    rm -rf "${SCRIPT_DIR}/volumes/autodeploy/.autodeploystatus"
+    rm -rf "${SCRIPT_DIR}"/volumes/autodeploy/.autodeploystatus
 
-    # Server app
-    cp "${SOURCES_DIR}/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear" "${SCRIPT_DIR}/volumes/autodeploy/"
-
-    # Plugins
-    # Add converters, importers ... here
-
-    cp "${SOURCES_DIR}/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/"
-    cp "${SOURCES_DIR}/docdoku-plm/converter-dae/converter-dae-ear/target/converter-dae-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/"
-    cp "${SOURCES_DIR}/docdoku-plm/converter-ifc/converter-ifc-ear/target/converter-ifc-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/"
-    cp "${SOURCES_DIR}/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/"
-    cp "${SOURCES_DIR}/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/"
-    cp "${SOURCES_DIR}/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear ${SCRIPT_DIR}/volumes/autodeploy/"
+    # Back
+    cp "${SOURCES_DIR}/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear" \
+       "${SOURCES_DIR}/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5-SNAPSHOT.ear" \
+       "${SOURCES_DIR}/docdoku-plm/converter-dae/converter-dae-ear/target/converter-dae-ear-2.5-SNAPSHOT.ear" \
+       "${SOURCES_DIR}/docdoku-plm/converter-ifc/converter-ifc-ear/target/converter-ifc-ear-2.5-SNAPSHOT.ear" \
+       "${SOURCES_DIR}/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5-SNAPSHOT.ear" \
+       "${SOURCES_DIR}/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5-SNAPSHOT.ear" \
+       "${SOURCES_DIR}/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear" \
+       "${SCRIPT_DIR}/volumes/autodeploy/"
 
     # Front
-    cp -R "${SOURCES_DIR}/docdoku-web-front/dist" "${SCRIPT_DIR}/volumes/web-front/"
-    cp -R "${SOURCES_DIR}/docdoku-web-front/app" "${SCRIPT_DIR}/volumes/web-front/"
+    cp -R \
+     "${SOURCES_DIR}"/docdoku-web-front/dist \
+     "${SOURCES_DIR}"/docdoku-web-front/app \
+     "${SCRIPT_DIR}"/volumes/web-front/
 
     echo "Done"
 }
@@ -200,7 +198,7 @@ run() {
 }
 
 create-admin () {
-   do-create-account "$1" "$2" "admin"
+    do-create-account "$1" "$2" "admin"
 }
 
 create-user (){
@@ -208,11 +206,16 @@ create-user (){
 }
 
 do-create-account (){
-     docker exec -it docdoku-plm-docker_db bash -c "mysql -u docdokuplm_user -D docdokuplm -p --execute=\" \
-           INSERT INTO docdokuplm.ACCOUNT VALUES ('$1', NOW(), '', 1, 'en', '$1', 'CET'); \
-           INSERT INTO docdokuplm.CREDENTIAL VALUES ('$1', MD5('$2')); \
-           INSERT INTO docdokuplm.USERGROUPMAPPING VALUES ('$1', '$3');\" \
-        "
+     docker exec -it docdoku-plm-docker_db bash -c \
+      "mysql -u docdokuplm_user -D docdokuplm -p --execute=\"\
+       INSERT INTO docdokuplm.ACCOUNT VALUES ('$1', NOW(), '', 1, 'en', '$1', 'CET'); \
+       INSERT INTO docdokuplm.CREDENTIAL VALUES ('$1', MD5('$2')); \
+       INSERT INTO docdokuplm.USERGROUPMAPPING VALUES ('$1', '$3'); \
+      \""
+}
+
+asadmin () {
+     docker exec -it docdoku-plm-docker_back bash -c "/opt/payara41/bin/asadmin --user admin $1"
 }
 
 sql () {
@@ -233,8 +236,8 @@ usage () {
     GREEN='\033[0;32m'
     NC='\033[0m'
     echo -e "${GREEN}DocDokuPLM${NC} platform-ctl"
-    echo -e "   Version ${SCRIPT_VERSION}"
-    echo -e "   Usage: ${GREEN} platform-ctl <command> [arguments]${NC} "
+    echo -e "  Version: ${SCRIPT_VERSION}"
+    echo -e "  Usage: ${GREEN}platform-ctl <command> [arguments]${NC} "
     echo -e ""
     echo -e "Available commands:"
     echo -e ""
@@ -253,6 +256,7 @@ usage () {
     echo -e "  ${GREEN}create-user <login> <pwd>${NC}:   Create a new user"
     echo -e "  ${GREEN}browser${NC}:                     Open your web browser and reach DocDokuPLM"
     echo -e "  ${GREEN}run \"command\"${NC}:               Run a custom command in build env"
+    echo -e "  ${GREEN}asadmin [\"command\"]${NC}:         Run asadmin in payara container (accept commands)"
     echo -e "  ${GREEN}help${NC}:                        Display this lines"
 
     echo -e ""
@@ -309,6 +313,9 @@ case "$1" in
     ;;
 "browser")
     browser "$2"
+    ;;
+"asadmin")
+    asadmin "$2"
     ;;
 *)
     usage

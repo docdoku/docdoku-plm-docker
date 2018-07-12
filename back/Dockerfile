@@ -22,6 +22,8 @@
 FROM docdokuplm:payara
 
 ARG DOCDOKU_PLM_CODEBASE
+ARG HEAP_SIZE
+
 ENV ASADMIN_PATH ${PAYARA_PATH}/bin
 ENV DOMAIN_DIR ${PAYARA_PATH}/glassfish/domains/domain1
 ENV JWT_ENABLED true
@@ -49,7 +51,6 @@ ENV KEYSTORE_KEY_ALIAS mykey
 ENV KEYSTORE_PASS changeit
 ENV KEYSTORE_KEY_PASS changeit
 ENV KEYSTORE_TYPE JCEKS
-ENV HEAP_SIZE 2g
 ENV NATIVE_LIBS /opt/native-libs
 ENV SOLIDWORKS_LICENSE_PATH /opt/plugins/solidworks/license.txt
 ENV SOLIDWORKS_SCHEMA_PATH /opt/plugins/solidworks/schema
