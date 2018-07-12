@@ -11,16 +11,16 @@ Requirements
 
 ## platform-ctl
 
-`platform-ctl` is a command wrapper that ease build, deployment and starting/stopping the whole software stack.
+`platform-ctl` is a command wrapper that aims to ease build, deployment and starting/stopping the whole software stack.
 
 Run `platform-ctl help` to list all commands
 
-First step is to clone the repositories and creating the base images. This may take a while, let's have a coffee break.
+First step is to clone the repositories and to create the base images. This may take a while, let's have a coffee break.
 
 	./platform-ctrl init-repo
 	./platform-ctrl build-images
 
-Then it's time to compile some artifacts
+Then it's time to package some artifacts
 
     ./platform-ctrl build-artifacts
 
@@ -28,7 +28,7 @@ Start the platform
 
 	./platform-ctrl up
 
-Deploy some apps
+Deploy the artifacts
 
 	./platform-ctrl deploy
 
@@ -40,7 +40,7 @@ Get platform health
 
 	./platofrm-ctl heatlh
 
-For more advanced commands, all `docker-compose` commands are supported. See https://docs.docker.com/compose/reference/ for full detail
+For more advanced commands, all `docker-compose` commands are supported. See https://docs.docker.com/compose/reference/ for full details
 
 ## Logging
 
