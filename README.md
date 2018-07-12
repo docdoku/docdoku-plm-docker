@@ -15,11 +15,13 @@ Requirements
 
 Run `platform-ctl help` to list all commands
 
-### Init the platform
+### Init and start the platform
 
 First step is to clone the repositories and to create the base images. This may take a while, let's have a coffee break.
 
-	./platform-ctrl init-repo
+You can clone with ssh or https (default).
+
+	./platform-ctrl init-repo [ssh|https]
 	./platform-ctrl build-images
 
 Then it's time to package some artifacts
@@ -34,7 +36,9 @@ Deploy the artifacts
 
 	./platform-ctrl deploy
 
-For more advanced commands, all `docker-compose` commands are supported. See https://docs.docker.com/compose/reference/ for full details
+Launch your browser once artifacts are all deployed
+
+	./platform-ctl browser [dev|prod]
 
 ### Logging and monitoring
 
@@ -73,7 +77,7 @@ You can also directly connect to the sql instance
 
 	./platform-ctl sql
 
-You will be prompt for your MySQL password (See `db/init.sql`)
+You will be asked for your MySQL password (See `db/init.sql`)
 
 ### Stop the app
 
@@ -81,12 +85,22 @@ This will shut down all containers
 
 	./platform-ctl down
 
-### Debugging
+### Development && Debugging
 
-Use the remote debug feature from your IDE. Debug port is 19009.
+You can edit the sources in the `volumes/src` folder and work with git as usual
+
+Use the remote debug feature from your IDE. Payara debug port is 19009.
 
 Add to your remote target options `-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=19009`
 
 ### Notes
 
+#### Docker-Compose
+
+For more advanced commands, all `docker-compose` commands are supported. See https://docs.docker.com/compose/reference/ for full details
+
+#### Platform-ctl
+
 `platform-ctl` can be symlinked or added to your PATH
+
+	(sudo) ln -s /path/to/platform-ctl /usr/bin/
