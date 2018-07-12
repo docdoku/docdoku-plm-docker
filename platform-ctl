@@ -76,13 +76,13 @@ init-repo () {
     fi
 
     if [ "$PROTOCOL" == "ssh" ]  ; then
-        git clone --single-branch -b develop "${EPLMP_SSH_URL}" "${SOURCES_DIR}/eplmp"
-        git clone --single-branch -b dev "${DOCDOKU_PLM_SSH_URL}" "${SOURCES_DIR}/docdoku-plm"
-        git clone --single-branch -b dev "${DOCDOKU_WEB_FRONT_SSH_URL}" "${SOURCES_DIR}/docdoku-web-front"
+        git clone --single-branch -b develop --depth 1 "${EPLMP_SSH_URL}" "${SOURCES_DIR}/eplmp"
+        git clone --single-branch -b dev --depth 1 "${DOCDOKU_PLM_SSH_URL}" "${SOURCES_DIR}/docdoku-plm"
+        git clone --single-branch -b dev --depth 1 "${DOCDOKU_WEB_FRONT_SSH_URL}" "${SOURCES_DIR}/docdoku-web-front"
     else
-        git clone --single-branch -b develop "${EPLMP_HTTPS_URL}" "${SOURCES_DIR}/eplmp"
-        git clone --single-branch -b dev "${DOCDOKU_PLM_HTTPS_URL}" "${SOURCES_DIR}/docdoku-plm"
-        git clone --single-branch -b dev "${DOCDOKU_WEB_FRONT_HTTPS_URL}" "${SOURCES_DIR}/docdoku-web-front"
+        git clone --single-branch -b develop --depth 1 "${EPLMP_HTTPS_URL}" "${SOURCES_DIR}/eplmp"
+        git clone --single-branch -b dev --depth 1 "${DOCDOKU_PLM_HTTPS_URL}" "${SOURCES_DIR}/docdoku-plm"
+        git clone --single-branch -b dev --depth 1 "${DOCDOKU_WEB_FRONT_HTTPS_URL}" "${SOURCES_DIR}/docdoku-web-front"
     fi
 }
 
