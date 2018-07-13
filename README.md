@@ -104,3 +104,49 @@ For more advanced commands, all `docker-compose` commands are supported. See htt
 `platform-ctl` can be symlinked or added to your PATH
 
 	(sudo) ln -s /path/to/platform-ctl /usr/bin/
+
+## DockerInstallation
+
+### Linux 
+
+#### Docker ce
+
+Download and install from .deb file or from your repository (apt-get install docker-ce)
+
+https://download.docker.com/linux/
+
+#### Docker compose
+
+Install docker-compose if not installed
+
+Download the latest release from https://github.com/docker/compose/releases/
+
+Make it executable and create a symlink or copy it to /usr/local/bin/
+
+Add your user to docker group. Run as root:
+
+	# usermod -aG docker your_user_name
+	# gpasswd -a your_user_name docker
+
+Start the service as root:
+
+	# service docker start
+
+Check if install is OK. Run as user:
+
+	$ docker ps
+
+
+### MacOSX
+
+Download and open the docker-ce .dmg file from official site. Or browser https://download.docker.com/mac/
+
+Run 
+
+	$ open Docker
+
+Or use the application search bar and type Docker
+
+### Windows
+
+TODO ...
