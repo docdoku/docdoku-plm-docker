@@ -33,7 +33,8 @@ services:
     ports:
       - "13000:3000"
     volumes:
-      - ./volumes/web-front:/usr/share/nginx/html
+      - ./volumes/web-front/dist:/usr/share/nginx/html/dist
+      - ./volumes/src/docdoku-web-front/app:/usr/share/nginx/html/app
 
   # Payara instance - JEE application server
   # Settings:

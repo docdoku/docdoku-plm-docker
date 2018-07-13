@@ -55,7 +55,7 @@ cd "${SCRIPT_DIR}" || quit "ERROR: Cannot find platform-ctl home directory" -1
 init-volumes () {
     echo "Preparing volumes ..."
     mkdir -p "${SCRIPT_DIR}"/volumes
-    mkdir -p "${SCRIPT_DIR}"/volumes/{db,vault,plugins,native-libs,m2,npm,autodeploy,elasticsearch-data,web-front/{app,dist}}
+    mkdir -p "${SCRIPT_DIR}"/volumes/{db,vault,plugins,native-libs,m2,npm,autodeploy,elasticsearch-data,web-front/{dist}}
 }
 
 init-repo () {
@@ -137,7 +137,6 @@ deploy () {
     # Front
     cp -R \
      "${SOURCES_DIR}"/docdoku-web-front/dist \
-     "${SOURCES_DIR}"/docdoku-web-front/app \
      "${SCRIPT_DIR}"/volumes/web-front/
 
     echo "Done"
@@ -155,7 +154,6 @@ verify-artifacts () {
     docker-compose run build-env md5sum "/src/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear"
 
     stat "${SOURCES_DIR}/docdoku-web-front/dist"
-    stat "${SOURCES_DIR}/docdoku-web-front/app"
 }
 
 logs (){
