@@ -122,7 +122,8 @@ build-artifacts (){
 deploy () {
     echo "Deploying artifacts ..."
 
-    rm -rf "${SCRIPT_DIR}"/volumes/autodeploy/.autodeploystatus
+    rm "${SCRIPT_DIR}"/volumes/autodeploy/* 2> /dev/null
+    rm "${SCRIPT_DIR}"/volumes/autodeploy/.autodeploystatus/* 2> /dev/null
 
     # Back
     cp "${SOURCES_DIR}/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear" \
@@ -132,12 +133,10 @@ deploy () {
        "${SOURCES_DIR}/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5-SNAPSHOT.ear" \
        "${SOURCES_DIR}/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5-SNAPSHOT.ear" \
        "${SOURCES_DIR}/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear" \
-       "${SCRIPT_DIR}/volumes/autodeploy/"
+        "${SCRIPT_DIR}/volumes/autodeploy/"
 
     # Front
-    cp -R \
-     "${SOURCES_DIR}"/docdoku-web-front/dist \
-     "${SCRIPT_DIR}"/volumes/web-front/
+    unzip -q -o -d "${SCRIPT_DIR}"/volumes/web-front/dist "${SOURCES_DIR}"/docdoku-web-front/target/docdoku-web-front.zip
 
     echo "Done"
 }
@@ -145,15 +144,16 @@ deploy () {
 verify-artifacts () {
 
     echo "Verifying artifacts ..."
-    docker-compose run build-env md5sum "/src/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear"
-    docker-compose run build-env md5sum "/src/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5-SNAPSHOT.ear"
-    docker-compose run build-env md5sum "/src/docdoku-plm/converter-dae/converter-dae-ear/target/converter-dae-ear-2.5-SNAPSHOT.ear"
-    docker-compose run build-env md5sum "/src/docdoku-plm/converter-ifc/converter-ifc-ear/target/converter-ifc-ear-2.5-SNAPSHOT.ear"
-    docker-compose run build-env md5sum "/src/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5-SNAPSHOT.ear"
-    docker-compose run build-env md5sum "/src/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5-SNAPSHOT.ear"
-    docker-compose run build-env md5sum "/src/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear"
 
-    stat "${SOURCES_DIR}/docdoku-web-front/dist"
+    docker-compose run build-env md5sum \
+        "/src/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear" \
+        "/src/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5-SNAPSHOT.ear" \
+        "/src/docdoku-plm/converter-dae/converter-dae-ear/target/converter-dae-ear-2.5-SNAPSHOT.ear" \
+        "/src/docdoku-plm/converter-ifc/converter-ifc-ear/target/converter-ifc-ear-2.5-SNAPSHOT.ear" \
+        "/src/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5-SNAPSHOT.ear" \
+        "/src/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5-SNAPSHOT.ear" \
+        "/src/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear" \
+        "/src/docdoku-web-front/target/docdoku-web-front.zip"
 }
 
 logs (){
@@ -258,6 +258,7 @@ usage () {
     echo -e "  ${GREEN}init-repo [<ssh|https>]${NC}:     Init the repositories to ./volumes/src/"
     echo -e "  ${GREEN}build-images${NC}:                Build the base docker images from docker-compose file"
     echo -e "  ${GREEN}build-artifacts${NC}:             Build the main artifacts from eplmp nd docdoku-plm sources"
+    echo -e "  ${GREEN}verify-artifacts${NC}:            Verify the main artifacts"
     echo -e "  ${GREEN}deploy${NC}:                      Copy the main artifacts to the autodeploy volume"
     echo -e "  ${GREEN}up${NC}:                          Start the containers"
     echo -e "  ${GREEN}down${NC}:                        Stop the containers"
@@ -286,6 +287,9 @@ case "$1" in
     ;;
 "build-artifacts")
     build-artifacts
+    ;;
+"verify-artifacts")
+    verify-artifacts
     ;;
 "deploy")
    verify-artifacts
