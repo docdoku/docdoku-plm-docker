@@ -55,7 +55,7 @@ cd "${SCRIPT_DIR}" || quit "ERROR: Cannot find platform-ctl home directory" -1
 init-volumes () {
     echo "Preparing volumes ..."
     mkdir -p "${SCRIPT_DIR}"/volumes
-    mkdir -p "${SCRIPT_DIR}"/volumes/{db,vault,plugins,native-libs,m2,npm,autodeploy,elasticsearch-data,web-front/{dist}}
+    mkdir -p "${SCRIPT_DIR}"/volumes/{db,vault,plugins,native-libs,m2,npm,autodeploy,elasticsearch-data,web-front}
 }
 
 init-repo () {
@@ -136,7 +136,7 @@ deploy () {
         "${SCRIPT_DIR}/volumes/autodeploy/"
 
     # Front
-    unzip -q -o -d "${SCRIPT_DIR}"/volumes/web-front/dist "${SOURCES_DIR}"/docdoku-web-front/target/docdoku-web-front.zip
+    unzip -q -o -d "${SCRIPT_DIR}"/volumes/web-front "${SOURCES_DIR}"/docdoku-web-front/target/docdoku-web-front.zip
 
     echo "Done"
 }
