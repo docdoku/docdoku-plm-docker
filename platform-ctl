@@ -223,12 +223,28 @@ sql () {
 }
 
 browser () {
-    if [ "$1" == "dev" ] ;
-        then
-        open http://localhost:10081
+
+    if [ -x "$(command -v xdg-open)" ]; then
+      COMMAND=xdg-open;
+    elif [ -x "$(command -v firefox)" ]; then
+      COMMAND=firefox;
+    elif ! [ -z $BROWSER ]; then
+      echo -e "Using your $BROWSER env var"
+      COMMAND=$BROWSER;
+    elif [ -x "$(command -v open)" ]; then
+        COMMAND=open;
     else
-        open http://localhost:10080
+      echo -e "Enter your browser command, or set \$BROWSER in your env vars"
+      read COMMAND
     fi
+
+    if [ "$1" == "dev" ] ; then
+        URL=http://localhost:10081
+    else
+        URL=http://localhost:10080
+    fi
+
+    $(${COMMAND} ${URL})
 }
 
 usage () {
