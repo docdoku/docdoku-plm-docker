@@ -270,8 +270,8 @@ usage () {
     echo -e "  ${GREEN}create-admin <login> <pwd>${NC}:  Create a new administrator"
     echo -e "  ${GREEN}create-user <login> <pwd>${NC}:   Create a new user"
     echo -e "  ${GREEN}browser${NC}:                     Open your web browser and reach DocDokuPLM"
-    echo -e "  ${GREEN}run \"command\"${NC}:               Run a custom command in build env"
-    echo -e "  ${GREEN}asadmin [\"command\"]${NC}:         Run asadmin in payara container (accept commands)"
+    echo -e "  ${GREEN}run \"command\"${NC}:             Run a custom command in build env"
+    echo -e "  ${GREEN}asadmin [\"command\"]${NC}:       Run asadmin in payara container (accept commands)"
     echo -e "  ${GREEN}help${NC}:                        Display this lines"
 
     echo -e ""
