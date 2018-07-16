@@ -150,3 +150,31 @@ Or use the application search bar and type Docker
 ### Windows
 
 TODO ...
+
+## SSL
+
+For local development, you need to trust the self signed certificates.
+
+Copy the certificates from the container to your host
+
+    docker cp docdoku-plm-docker_proxy:/etc/nginx/ssl/rootCA.pem /host/path/to/certs/
+    docker cp docdoku-plm-docker_proxy:/etc/nginx/ssl/cert.crt /host/path/to/certs/
+
+### Osx
+
+Open keychain access and import both pem and key file. Double click on each and set "trust always".
+
+### Ubuntu
+
+Using ca-certificates
+
+Run as root
+
+	apt-get install ca-certificates
+	cp /host/path/to/certs/* /usr/share/ca-certificates/
+    update-ca-certificates
+
+
+### Others ...
+
+TODO ...
