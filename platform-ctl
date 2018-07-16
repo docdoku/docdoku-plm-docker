@@ -105,18 +105,31 @@ build-images (){
 }
 
 build-artifacts (){
-    echo "Building artifacts ..."
-    echo "docdoku-web-front ..." && \
-     docker-compose run build-env bash -c "cd /src/docdoku-web-front && npm run build --unsafe-perm --quiet" && \
-     echo "... done" && \
+    echo "Building artifacts ..." 
+    
+    docker-compose run build-env bash -c \
+        "cd /src/docdoku-web-front && npm run build --unsafe-perm --quiet && \
+        mvn clean install -f /src/eplmp/pom.xml && \
+        mvn clean install -f /src/docdoku-plm/pom.xml" && \
+        
+     echo "... done" 
+}
 
-    echo "eplmp ..." && \
-     docker-compose run build-env bash -c "mvn clean install --quiet -f /src/eplmp/pom.xml" && \
-     echo "... done" && \
-
-    echo "docodku-plm ..." && \
-     docker-compose run build-env bash -c "mvn clean install --quiet -f /src/docdoku-plm/pom.xml" && \
-     echo "... done"
+build () {
+  case "$1" in
+  "docdoku-web-front")
+     docker-compose run build-env bash -c "cd /src/docdoku-web-front && npm run build --unsafe-perm --quiet"
+      ;;
+  "eplmp")
+     docker-compose run build-env bash -c "mvn clean install -f /src/eplmp/pom.xml"
+      ;;
+  "docdoku-plm")
+    docker-compose run build-env bash -c "mvn clean install -f /src/docdoku-plm/pom.xml"
+      ;;
+  *)
+      echo "Specify target: front, back, plugins"
+      ;;
+  esac
 }
 
 deploy () {
@@ -258,6 +271,7 @@ usage () {
     echo -e "  ${GREEN}init-repo [<ssh|https>]${NC}:     Init the repositories to ./volumes/src/"
     echo -e "  ${GREEN}build-images${NC}:                Build the base docker images from docker-compose file"
     echo -e "  ${GREEN}build-artifacts${NC}:             Build the main artifacts from eplmp nd docdoku-plm sources"
+    echo -e "  ${GREEN}build <target>${NC}:              Build  specified artifact (target values: docdoku-web-front, eplmp, docdoku-plm)"
     echo -e "  ${GREEN}verify-artifacts${NC}:            Verify the main artifacts"
     echo -e "  ${GREEN}deploy${NC}:                      Copy the main artifacts to the autodeploy volume"
     echo -e "  ${GREEN}up${NC}:                          Start the containers"
@@ -287,6 +301,9 @@ case "$1" in
     ;;
 "build-artifacts")
     build-artifacts
+    ;;
+"build")
+    build "$2"
     ;;
 "verify-artifacts")
     verify-artifacts
