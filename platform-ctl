@@ -237,9 +237,9 @@ browser () {
     fi
 
     if [ "$1" == "dev" ] ; then
-        URL=http://localhost:10081
+        URL=https://docdokuplm.local:10081
     else
-        URL=http://localhost:10080
+        URL=https://docdokuplm.local:10080
     fi
 
     $(${COMMAND} ${URL})

@@ -47,7 +47,7 @@ services:
     build:
       context: ./back
       args:
-        - DOCDOKU_PLM_CODEBASE=http://docdokuplm.local
+        - DOCDOKU_PLM_CODEBASE=https://docdokuplm.local:10080
         - HEAP_SIZE=2g
         - AS_ADMIN_PASSWORD=changeit
     volumes:
