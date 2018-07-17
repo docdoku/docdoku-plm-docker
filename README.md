@@ -143,7 +143,7 @@ Download and open the docker-ce .dmg file from official site. Or browser https:/
 
 Run 
 
-	$ open Docker
+	$ open -a Docker
 
 Or use the application search bar and type Docker
 
@@ -157,12 +157,30 @@ For local development, you need to trust the self signed certificates.
 
 Copy the certificates from the container to your host
 
-    docker cp docdoku-plm-docker_proxy:/etc/nginx/ssl/rootCA.pem /host/path/to/certs/
-    docker cp docdoku-plm-docker_proxy:/etc/nginx/ssl/cert.crt /host/path/to/certs/
+    docker cp docdoku-plm-docker_proxy:/etc/nginx/ssl/rootCA.pem ./volumes/ssl/
+    docker cp docdoku-plm-docker_proxy:/etc/nginx/ssl/cert.crt ./volumes/ssl/
+    docker cp docdoku-plm-docker_proxy:/etc/nginx/ssl/rootCA.key ./volumes/ssl/
+    docker cp docdoku-plm-docker_proxy:/etc/nginx/ssl/cert.key ./volumes/ssl/
+
+If you have to rebuild your image, once up, copy your certs into the container.
+
+	docker cp ./volumes/ssl/rootCA.pem docdoku-plm-docker_proxy:/etc/nginx/ssl/
+	docker cp ./volumes/ssl/rootCA.key docdoku-plm-docker_proxy:/etc/nginx/ssl/
+	docker cp ./volumes/ssl/cert.crt docdoku-plm-docker_proxy:/etc/nginx/ssl/
+	docker cp ./volumes/ssl/cert.key docdoku-plm-docker_proxy:/etc/nginx/ssl/
+
+### jdk
+
+The JVM running your Java client SDK applications needs to trust the certificate
+
+	(sudo) keytool -importcert -file cert.crt -keystore /Library/Java/JavaVirtualMachines/jdk1.8.0_171.jdk/Contents/Home/jre/lib/security/cacerts -storepass changeit -noprompt -alias "docdokuplm.local.cert.crt"
+
+	(sudo) keytool -importcert -file rootCA.pem -keystore /Library/Java/JavaVirtualMachines/jdk1.8.0_171.jdk/Contents/Home/jre/lib/security/cacerts -storepass changeit -noprompt -alias "docdokuplm.local.rootCA.pem"
+
 
 ### Osx
 
-Open keychain access and import both pem and key file. Double click on each and set "trust always".
+Open keychain access and import both rootCA.pem and cert.crt file. Double click both and set "trust always".
 
 ### Ubuntu
 
