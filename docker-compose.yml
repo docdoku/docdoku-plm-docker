@@ -22,7 +22,7 @@ version: '2'
 
 services:
 
-  # Web front: nginx server on host source files  
+  # Web front: nginx server on host source files
   # volumes: static files from web front source on the host.
   front:
     container_name: docdoku-plm-docker_front
@@ -46,8 +46,8 @@ services:
       - es
     build:
       context: ./back
-      args:       
-        - DOCDOKU_PLM_CODEBASE=http://localhost:10080
+      args:
+        - DOCDOKU_PLM_CODEBASE=https://docdokuplm.local:10080
         - HEAP_SIZE=2g
         - AS_ADMIN_PASSWORD=changeit
     volumes:
@@ -77,6 +77,9 @@ services:
       - kibana
     build:
       context: ./proxy
+      args:
+        - "DOMAIN=docdokuplm.local"
+        - "EMAIL=admin@docdokuplm.local"
     networks:
       - network
     ports:
@@ -102,10 +105,10 @@ services:
       memlock:
         soft: -1
         hard: -1
-    mem_limit: 1g   
+    mem_limit: 1g
     networks:
       - network
-    ports:      
+    ports:
       - "19200:9200"
       - "19300:9300"
     volumes:
