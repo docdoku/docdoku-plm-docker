@@ -208,6 +208,17 @@ run() {
     docker-compose run build-env bash -c "$cmd"
 }
 
+test () {
+  case "$1" in
+  "docdoku-web-front")
+     docker-compose run build-env bash -c "cd /src/docdoku-web-front/tests && node run --casperjs=/usr/bin/casperjs --domain=proxy --port=10081 --protocol=https"
+      ;;
+  *)
+      echo "Specify target: docdoku-web-front, docdoku-api-java"
+      ;;
+  esac
+}
+
 create-admin () {
     do-create-account "$1" "$2" "admin"
 }
@@ -351,6 +362,9 @@ case "$1" in
     ;;
 "asadmin")
     asadmin "$2"
+    ;;
+"test")
+    test "$2"
     ;;
 *)
     usage

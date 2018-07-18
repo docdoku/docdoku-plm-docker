@@ -36,10 +36,15 @@ FROM ubuntu:16.04
 
 RUN \
     apt-get update && \
-    apt-get install -y openjdk-8-jdk maven build-essential curl git && \
+    apt-get install -y openjdk-8-jdk maven build-essential curl git wget && \
     curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
     apt-get install -y nodejs && \
-    npm install npm@6.1.0 -g
+    npm install npm@6.1.0 -g && \
+	npm install -g casperjs@1.1.4 && \
+	wget --quiet https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2 && \
+	tar xvjf phantomjs-2.1.1-linux-x86_64.tar.bz2 -C /usr/local/share/ && \
+	ln -s /usr/local/share/phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/local/bin/ && \
+    rm phantomjs-2.1.1-linux-x86_64.tar.bz2
 
 # Allow dependency cache control
 VOLUME ["/src", "/root/.m2", "/root/.npm"]

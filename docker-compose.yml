@@ -149,6 +149,10 @@ services:
       - ./volumes/src:/src
       - ./volumes/m2:/root/.m2
       - ./volumes/npm:/root/.npm
+    networks:
+      - network
+    links:
+      - "proxy:docdokuplm.local"
 
 networks:
   network:
