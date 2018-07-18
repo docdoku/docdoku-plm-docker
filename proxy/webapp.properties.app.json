@@ -7,5 +7,6 @@
         "wsDomain": "mydomain"
     },
     "contextPath": "/",
-    "preferLoginWith": false
+    "preferLoginWith": false,
+    "debug": true
 }
