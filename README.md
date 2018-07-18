@@ -62,7 +62,11 @@ You can run any command in the build env with
 
 Example
 
-	./platform-ctl run "mvn clean install -f /src/docdoku-plm"
+	./platform-ctl run "mvn clean install -f /src/docdoku-plm/pom.xml"
+
+Or open a shell into the container
+
+	./platform-ctl run "bash"
 
 Look at the `build-env/Dockerfile` for more details on the system
 
@@ -157,26 +161,28 @@ For local development, you need to trust the self signed certificates.
 
 Copy the certificates from the container to your host
 
+	mkdir -p ./volumes/ssl
+
     docker cp docdoku-plm-docker_proxy:/etc/nginx/ssl/rootCA.pem ./volumes/ssl/
     docker cp docdoku-plm-docker_proxy:/etc/nginx/ssl/cert.crt ./volumes/ssl/
     docker cp docdoku-plm-docker_proxy:/etc/nginx/ssl/rootCA.key ./volumes/ssl/
     docker cp docdoku-plm-docker_proxy:/etc/nginx/ssl/cert.key ./volumes/ssl/
 
-If you have to rebuild your image, once up, copy your certs into the container.
+To restore saved certs (in case of deploying a new proxy image)
 
 	docker cp ./volumes/ssl/rootCA.pem docdoku-plm-docker_proxy:/etc/nginx/ssl/
 	docker cp ./volumes/ssl/rootCA.key docdoku-plm-docker_proxy:/etc/nginx/ssl/
 	docker cp ./volumes/ssl/cert.crt docdoku-plm-docker_proxy:/etc/nginx/ssl/
 	docker cp ./volumes/ssl/cert.key docdoku-plm-docker_proxy:/etc/nginx/ssl/
+	docker restart docdoku-plm-docker_proxy
 
 ### jdk
 
 The JVM running your Java client SDK applications needs to trust the certificate
 
-	(sudo) keytool -importcert -file cert.crt -keystore /Library/Java/JavaVirtualMachines/jdk1.8.0_171.jdk/Contents/Home/jre/lib/security/cacerts -storepass changeit -noprompt -alias "docdokuplm.local.cert.crt"
+	(sudo) keytool -importcert -file cert.crt -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass changeit -noprompt -alias "docdokuplm.local.cert.crt"
 
-	(sudo) keytool -importcert -file rootCA.pem -keystore /Library/Java/JavaVirtualMachines/jdk1.8.0_171.jdk/Contents/Home/jre/lib/security/cacerts -storepass changeit -noprompt -alias "docdokuplm.local.rootCA.pem"
-
+	(sudo) keytool -importcert -file rootCA.pem -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass changeit -noprompt -alias "docdokuplm.local.rootCA.pem"
 
 ### Osx
 
