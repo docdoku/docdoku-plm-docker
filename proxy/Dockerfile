@@ -2,7 +2,7 @@ FROM nginx:alpine
 
 ARG DOMAIN
 ARG EMAIL
-RUN apk add openssl
+RUN apk update && apk add openssl
 RUN mkdir /etc/nginx/ssl
 
 COPY v3.ext /etc/nginx/ssl/v3.ext
