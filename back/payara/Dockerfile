@@ -69,7 +69,7 @@ RUN \
  wget --quiet -O /opt/decimater.zip ${DECIMATER_URL} && \
  wget --quiet -O /opt/meshconv/meshconv ${MESHCONV_URL} && \
  unzip -qq /opt/ifcconvert.zip -d /opt/ifcconvert && \
- unzip -qq /opt/decimater.zip -d /opt/decimater && \
+ unzip -qq /opt/decimater.zip -d /opt/ && \
  rm /opt/ifcconvert.zip && \
  rm /opt/decimater.zip
 
