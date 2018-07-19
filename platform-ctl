@@ -281,7 +281,7 @@ usage () {
     echo -e ""
     echo -e "  ${GREEN}init-repo [<ssh|https>]${NC}:     Init the repositories to ./volumes/src/"
     echo -e "  ${GREEN}build-images${NC}:                Build the base docker images from docker-compose file"
-    echo -e "  ${GREEN}build-artifacts${NC}:             Build the main artifacts from eplmp nd docdoku-plm sources"
+    echo -e "  ${GREEN}build-artifacts${NC}:             Build the main artifacts from eplmp and docdoku-plm sources"
     echo -e "  ${GREEN}build <target>${NC}:              Build  specified artifact (target values: docdoku-web-front, eplmp, docdoku-plm)"
     echo -e "  ${GREEN}verify-artifacts${NC}:            Verify the main artifacts"
     echo -e "  ${GREEN}deploy${NC}:                      Copy the main artifacts to the autodeploy volume"
