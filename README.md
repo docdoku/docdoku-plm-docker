@@ -91,11 +91,24 @@ This will shut down all containers
 
 ### Development && Debugging
 
+Add to your `/etc/hosts` file
+
+	127.0.0.1	docdokuplm.local
+
 You can edit the sources in the `volumes/src` folder and work with git as usual. Run the command `git fetch --unshallow` on each repository to get the full history.
 
 Use the remote debug feature from your IDE. Payara debug port is 19009.
 
 Add to your remote target options `-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=19009`
+
+Available apps and ports on docdokuplm.local
+
+* 14848: payara admin
+* 19009: payara debug
+* 10080: front (dist) + webservices
+* 10081: front (dev) + webservices
+* 10082: elasticsearch
+* 10083: kibana
 
 ### Notes
 
