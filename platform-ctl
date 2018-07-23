@@ -19,7 +19,7 @@
 # along with DocDokuPLM.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-SCRIPT_VERSION=0.0.3
+SCRIPT_VERSION=0.0.4
 
 # Repositories
 EPLMP_SSH_URL=git@github.com:polarsys/eplmp.git
@@ -117,47 +117,74 @@ build-artifacts (){
 
 build () {
   case "$1" in
-  "docdoku-web-front")
+  "front")
      docker-compose run build-env bash -c "cd /src/docdoku-web-front && npm run build --unsafe-perm --quiet"
       ;;
   "eplmp")
      docker-compose run build-env bash -c "mvn clean install -f /src/eplmp/pom.xml"
       ;;
-  "docdoku-plm")
+  "plm")
     docker-compose run build-env bash -c "mvn clean install -f /src/docdoku-plm/pom.xml"
       ;;
   *)
-      echo "Specify target: front, back, plugins"
+      echo "Specify target: front, eplmp, plm"
       ;;
   esac
 }
 
 deploy () {
-    echo "Deploying artifacts ..."
+  echo "Deploying artifacts ..."
 
-    rm "${SCRIPT_DIR}"/volumes/autodeploy/* 2> /dev/null
-    rm "${SCRIPT_DIR}"/volumes/autodeploy/.autodeploystatus/* 2> /dev/null
+  case "$1" in
+  "front")
+     deploy-front
+      ;;
+  "eplmp")
+     deploy-eplmp
+      ;;
+  "plm")
+    deploy-plm
+      ;;
+  *)
+      deploy-front
+      deploy-eplmp
+      deploy-plm
+      ;;
+  esac
 
-    # Back
-    cp "${SOURCES_DIR}/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear" \
-       "${SOURCES_DIR}/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5-SNAPSHOT.ear" \
+  echo "Done"
+}
+
+deploy-front () {
+    echo -e "Deploying front"
+    unzip -q -o -d "${SCRIPT_DIR}"/volumes/web-front "${SOURCES_DIR}"/docdoku-web-front/target/docdoku-web-front.zip
+}
+
+deploy-eplmp () {
+    echo -e "Deploying EPLMP"
+    rm "${SCRIPT_DIR}"/volumes/autodeploy/eplmp-server-ear* 2> /dev/null
+    rm "${SCRIPT_DIR}"/volumes/autodeploy/.autodeploystatus/eplmp-server-ear* 2> /dev/null
+    cp "${SOURCES_DIR}/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear" "${SCRIPT_DIR}/volumes/autodeploy/"
+}
+
+deploy-plm () {
+  echo -e "Deploying PLM plugins"
+  rm "${SCRIPT_DIR}"/volumes/autodeploy/converter* 2> /dev/null
+  rm "${SCRIPT_DIR}"/volumes/autodeploy/importer* 2> /dev/null
+  rm "${SCRIPT_DIR}"/volumes/autodeploy/.autodeploystatus/converter* 2> /dev/null
+  rm "${SCRIPT_DIR}"/volumes/autodeploy/.autodeploystatus/importer* 2> /dev/null
+
+  cp "${SOURCES_DIR}/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5-SNAPSHOT.ear" \
        "${SOURCES_DIR}/docdoku-plm/converter-dae/converter-dae-ear/target/converter-dae-ear-2.5-SNAPSHOT.ear" \
        "${SOURCES_DIR}/docdoku-plm/converter-ifc/converter-ifc-ear/target/converter-ifc-ear-2.5-SNAPSHOT.ear" \
        "${SOURCES_DIR}/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5-SNAPSHOT.ear" \
        "${SOURCES_DIR}/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5-SNAPSHOT.ear" \
        "${SOURCES_DIR}/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear" \
         "${SCRIPT_DIR}/volumes/autodeploy/"
-
-    # Front
-    unzip -q -o -d "${SCRIPT_DIR}"/volumes/web-front "${SOURCES_DIR}"/docdoku-web-front/target/docdoku-web-front.zip
-
-    echo "Done"
 }
 
 verify-artifacts () {
-
     echo "Verifying artifacts ..."
-
     docker-compose run build-env md5sum \
         "/src/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear" \
         "/src/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5-SNAPSHOT.ear" \
@@ -210,11 +237,14 @@ run() {
 
 test () {
   case "$1" in
-  "docdoku-web-front")
+  "front")
      docker-compose run build-env bash -c "cd /src/docdoku-web-front/tests && node run --casperjs=/usr/bin/casperjs --domain=proxy --port=10081 --protocol=https"
       ;;
+  "api-java")
+     docker-compose run build-env bash -c "cd /src/docdoku-plm/docdoku-api-java && mvn clean test -P running-instance -Denv.LOGIN=test -Denv.PASSWORD=test -Denv.URL=https://docdokuplm.local:10080/eplmp-server-rest/api -Denv.WORKSPACE=apitest -Denv.ROOT_LOGIN=root -Denv.ROOT_PASSWORD=root"
+      ;;
   *)
-      echo "Specify target: docdoku-web-front, docdoku-api-java"
+      echo "Specify target: front, api-java"
       ;;
   esac
 }
@@ -298,9 +328,10 @@ usage () {
     echo -e "  ${GREEN}init-repo [<ssh|https>]${NC}:     Init the repositories to ./volumes/src/"
     echo -e "  ${GREEN}build-images${NC}:                Build the base docker images from docker-compose file"
     echo -e "  ${GREEN}build-artifacts${NC}:             Build the main artifacts from eplmp and docdoku-plm sources"
-    echo -e "  ${GREEN}build <target>${NC}:              Build  specified artifact (target values: docdoku-web-front, eplmp, docdoku-plm)"
+    echo -e "  ${GREEN}build <target>${NC}:              Build  specified artifact (target values: front, eplmp, plm)"
+    echo -e "  ${GREEN}test <target>${NC}:               Launch e2e tests. Target values: front, java-api)"
     echo -e "  ${GREEN}verify-artifacts${NC}:            Verify the main artifacts"
-    echo -e "  ${GREEN}deploy${NC}:                      Copy the main artifacts to the autodeploy volume"
+    echo -e "  ${GREEN}deploy [target]${NC}:             Copy the main artifacts to the autodeploy volume. Target values (front, eplmp, plm)"
     echo -e "  ${GREEN}up${NC}:                          Start the containers"
     echo -e "  ${GREEN}down${NC}:                        Stop the containers"
     echo -e "  ${GREEN}status${NC}:                      Get a status of running images"
@@ -336,8 +367,7 @@ case "$1" in
     verify-artifacts
     ;;
 "deploy")
-   verify-artifacts
-   deploy
+   deploy "$2"
     ;;
 "up")
     down && \
