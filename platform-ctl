@@ -227,7 +227,6 @@ status () {
 }
 
 run() {
-
     cmd="$*"
     if [ -z "$cmd" ]
       then
@@ -317,6 +316,14 @@ restore-ssl () {
     docker cp "${SCRIPT_DIR}"/volumes/ssl/cert.crt docdoku-plm-docker_proxy:/etc/nginx/ssl/
     docker cp "${SCRIPT_DIR}"/volumes/ssl/cert.key docdoku-plm-docker_proxy:/etc/nginx/ssl/
     docker restart docdoku-plm-docker_proxy
+}
+
+insert-sample () {
+  docker-compose run build-env bash -c "\
+   cd /src/docdoku-plm-sample-data && \
+  
+   java -classpath target/docdoku-plm-sample-data.jar:target/dependency/docdoku-api-java-2.5-SNAPSHOT.jar:target/dependency/* com.docdoku.loaders.Main -h http://back:8080/eplmp-server-rest -u "$1" -p "$2" \
+  "
 }
 
 usage () {
@@ -421,6 +428,9 @@ case "$1" in
     ;;
 "restore-ssl")
     restore-ssl
+    ;;
+"insert-sample")
+    insert-sample "$2" "$3"
     ;;
 *)
     usage

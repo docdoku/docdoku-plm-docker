@@ -145,6 +145,9 @@ services:
   build-env:
     container_name: docdoku-plm-docker_build-env
     build: ./build-env
+    depends_on: 
+      - back
+      - proxy
     volumes:
       - ./volumes/src:/src
       - ./volumes/m2:/root/.m2
@@ -153,6 +156,7 @@ services:
       - network
     links:
       - "proxy:docdokuplm.local"
+      - "back:back"
 
 networks:
   network:
