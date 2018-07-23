@@ -28,6 +28,8 @@ DOCDOKU_PLM_SSH_URL=git@github.com:docdoku/docdoku-plm.git
 DOCDOKU_PLM_HTTPS_URL=https://github.com/docdoku/docdoku-plm.git
 DOCDOKU_WEB_FRONT_SSH_URL=git@github.com:docdoku/docdoku-web-front.git
 DOCDOKU_WEB_FRONT_HTTPS_URL=https://github.com/docdoku/docdoku-web-front.git
+DOCDOKU_PLM_SAMPLE_SSH_URL=git@github.com:docdoku/docdoku-plm-sample-data.git
+DOCDOKU_PLM_SAMPLE_HTTPS_URL=https://github.com/docdoku/docdoku-plm-sample-data.git
 
 # Resolve script dir (may be a symlink or sourced script)
 dir () {
@@ -79,10 +81,12 @@ init-repo () {
         git clone --single-branch -b develop --depth 1 "${EPLMP_SSH_URL}" "${SOURCES_DIR}/eplmp"
         git clone --single-branch -b dev --depth 1 "${DOCDOKU_PLM_SSH_URL}" "${SOURCES_DIR}/docdoku-plm"
         git clone --single-branch -b dev --depth 1 "${DOCDOKU_WEB_FRONT_SSH_URL}" "${SOURCES_DIR}/docdoku-web-front"
+        git clone --single-branch -b dev --depth 1 "${DOCDOKU_PLM_SAMPLE_SSH_URL}" "${SOURCES_DIR}/docdoku-plm-sample-data"
     else
         git clone --single-branch -b develop --depth 1 "${EPLMP_HTTPS_URL}" "${SOURCES_DIR}/eplmp"
         git clone --single-branch -b dev --depth 1 "${DOCDOKU_PLM_HTTPS_URL}" "${SOURCES_DIR}/docdoku-plm"
         git clone --single-branch -b dev --depth 1 "${DOCDOKU_WEB_FRONT_HTTPS_URL}" "${SOURCES_DIR}/docdoku-web-front"
+        git clone --single-branch -b dev --depth 1 "${DOCDOKU_PLM_SAMPLE_HTTPS_URL}" "${SOURCES_DIR}/docdoku-plm-sample-data"
     fi
 }
 
