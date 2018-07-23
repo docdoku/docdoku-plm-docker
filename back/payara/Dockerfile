@@ -70,6 +70,7 @@ RUN \
  wget --quiet -O /opt/meshconv/meshconv ${MESHCONV_URL} && \
  unzip -qq /opt/ifcconvert.zip -d /opt/ifcconvert && \
  unzip -qq /opt/decimater.zip -d /opt/ && \
+ chmod +x /opt/meshconv/meshconv && \
  rm /opt/ifcconvert.zip && \
  rm /opt/decimater.zip
 
