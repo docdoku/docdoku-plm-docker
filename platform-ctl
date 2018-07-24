@@ -246,6 +246,9 @@ test () {
   "api-java")
      docker-compose run build-env bash -c "cd /src/docdoku-plm/docdoku-api-java && mvn clean test -P running-instance -Denv.LOGIN=test -Denv.PASSWORD=test -Denv.URL=https://docdokuplm.local:10080/eplmp-server-rest/api -Denv.WORKSPACE=apitest -Denv.ROOT_LOGIN=root -Denv.ROOT_PASSWORD=root"
       ;;
+  "cli")
+     docker-compose run build-env bash -c "cd /src/docdoku-plm/docdoku-cli && mvn clean test -Prunning-instance -Denv.LOGIN=test -Denv.PASSWORD=test -Denv.HOST=back -Denv.CONTEXT_ROOT=/eplmp-server-rest -Denv.PORT=8080 -Denv.WORKSPACE=test -Denv.SSL=false"
+      ;;
   *)
       echo "Specify target: front, api-java"
       ;;
