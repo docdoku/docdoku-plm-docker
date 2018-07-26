@@ -100,6 +100,11 @@ up () {
     docker-compose up -d
 }
 
+restart-containers () {
+  down 
+  up
+}
+
 build-images (){
     # Build the base payara image with dependencies
     echo "Building base image ..." && \
@@ -329,6 +334,33 @@ insert-sample () {
   "
 }
 
+reset () {
+  read -p "Are you sure to want to reset database and uploaded files ? [y/N]" yN
+  case ${yN:0:1} in
+      y|Y )
+          do-reset
+      ;;
+      * )
+          exit 0
+      ;;
+  esac
+}
+
+do-reset () {
+  echo -e "Recreating database ..." && \
+  docker exec -it docdoku-plm-docker_db bash -c \
+      "mysql -u docdokuplm_user -D docdokuplm -p --execute=\"\
+       drop database docdokuplm; \
+       create database docdokuplm; \
+      \"" && \
+  echo -e "Removing uploaded files..." && \
+  docker exec -it docdoku-plm-docker_back bash -c "rm -rf /var/lib/docdoku/vault/*" && \
+  echo -e "Removing indexed data ..." && \
+  docker exec -it docdoku-plm-docker_back bash -c "curl -XDELETE -u 'elastic:changeme' http://es:9200/_all" && \
+  echo -e "Restarting containers..." && \
+  restart-containers
+}
+
 usage () {
 
     GREEN='\033[0;32m'
@@ -434,6 +466,9 @@ case "$1" in
     ;;
 "insert-sample")
     insert-sample "$2" "$3"
+    ;;
+"reset")
+    reset
     ;;
 *)
     usage
