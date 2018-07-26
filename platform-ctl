@@ -119,7 +119,8 @@ build-artifacts (){
     docker-compose run build-env bash -c \
         "cd /src/docdoku-web-front && npm run build --unsafe-perm --quiet && \
         mvn clean install -f /src/eplmp/pom.xml && \
-        mvn clean install -f /src/docdoku-plm/pom.xml" && \
+        mvn clean install -f /src/docdoku-plm/pom.xml && \
+        mvn clean install dependency:copy-dependencies -f /src/docdoku-plm-sample-data/pom.xml" && \
         
      echo "... done" 
 }
@@ -135,8 +136,11 @@ build () {
   "plm")
     docker-compose run build-env bash -c "mvn clean install -f /src/docdoku-plm/pom.xml"
       ;;
+  "sample")
+    docker-compose run build-env bash -c "mvn clean install dependency:copy-dependencies -f /src/docdoku-plm-sample-data/pom.xml"
+      ;;
   *)
-      echo "Specify target: front, eplmp, plm"
+      echo "Specify target: front, eplmp, plm, sample"
       ;;
   esac
 }
@@ -202,6 +206,9 @@ verify-artifacts () {
         "/src/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5-SNAPSHOT.ear" \
         "/src/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5-SNAPSHOT.ear" \
         "/src/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear" \
+        "/src/docdoku-plm/docdoku-cli/target/docdoku-cli-jar-with-dependencies.jar" \
+        "/src/docdoku-plm/docdoku-api/target/docdoku-api-2.5-SNAPSHOT-json.jar" \
+        "/src/docdoku-plm/docdoku-api-java/target/docdoku-api-java-2.5-SNAPSHOT-jar-with-dependencies.jar" \
         "/src/docdoku-web-front/target/docdoku-web-front.zip"
 }
 
@@ -286,16 +293,15 @@ sql () {
 }
 
 browser () {
-
-    if [ -x "$(command -v xdg-open)" ]; then
-      COMMAND=xdg-open;
-    elif [ -x "$(command -v firefox)" ]; then
-      COMMAND=firefox;
-    elif ! [ -z $BROWSER ]; then
+    if ! [ -z $BROWSER ] ; then
       echo -e "Using your $BROWSER env var"
-      COMMAND=$BROWSER;
-    elif [ -x "$(command -v open)" ]; then
-        COMMAND=open;
+      COMMAND=$BROWSER
+    elif [ -x "$(command -v xdg-open)" ] ; then
+      COMMAND=xdg-open
+    elif [ -x "$(command -v firefox)" ] ; then
+      COMMAND=firefox
+    elif [ -x "$(command -v open)" ] ; then
+      COMMAND=open
     else
       echo -e "Enter your browser command, or set \$BROWSER in your env vars"
       read COMMAND
@@ -374,7 +380,7 @@ usage () {
     echo -e "  ${GREEN}init-repo [<ssh|https>]${NC}:     Init the repositories to ./volumes/src/"
     echo -e "  ${GREEN}build-images${NC}:                Build the base docker images from docker-compose file"
     echo -e "  ${GREEN}build-artifacts${NC}:             Build the main artifacts from eplmp and docdoku-plm sources"
-    echo -e "  ${GREEN}build <target>${NC}:              Build  specified artifact (target values: front, eplmp, plm)"
+    echo -e "  ${GREEN}build <target>${NC}:              Build  specified artifact (target values: front, eplmp, plm, sample)"
     echo -e "  ${GREEN}test <target>${NC}:               Launch e2e tests. Target values: front, java-api)"
     echo -e "  ${GREEN}verify-artifacts${NC}:            Verify the main artifacts"
     echo -e "  ${GREEN}deploy [target]${NC}:             Copy the main artifacts to the autodeploy volume. Target values (front, eplmp, plm)"
@@ -388,8 +394,8 @@ usage () {
     echo -e "  ${GREEN}create-admin <login> <pwd>${NC}:  Create a new administrator"
     echo -e "  ${GREEN}create-user <login> <pwd>${NC}:   Create a new user"
     echo -e "  ${GREEN}browser${NC}:                     Open your web browser and reach DocDokuPLM"
-    echo -e "  ${GREEN}run \"command\"${NC}:             Run a custom command in build env"
-    echo -e "  ${GREEN}asadmin [\"command\"]${NC}:       Run asadmin in payara container (accept commands)"
+    echo -e "  ${GREEN}run 'command'${NC}:               Run a custom command in build env"
+    echo -e "  ${GREEN}asadmin ['command']${NC}:         Run asadmin in payara container (accept commands)"
     echo -e "  ${GREEN}help${NC}:                        Display this lines"
 
     echo -e ""
