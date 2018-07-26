@@ -37,8 +37,6 @@ services:
       - ./volumes/src/docdoku-web-front/app:/usr/share/nginx/app
 
   # Payara instance - JEE application server
-  # Settings:
-  #  - DOCDOKU_PLM_CODEBASE : Web front address
   back:
     container_name: docdoku-plm-docker_back
     depends_on:
@@ -50,6 +48,23 @@ services:
         - DOCDOKU_PLM_CODEBASE=https://docdokuplm.local:10080
         - HEAP_SIZE=1g
         - AS_ADMIN_PASSWORD=changeit
+        - JWT_ENABLED=true
+        - JWT_KEY=MyVerySecretPhrase
+        - SESSION_ENABLED=false
+        - BASIC_AUTH_ENABLED=false
+        - DATABASE_USER=docdokuplm_user
+        - DATABASE_PWD=changeit
+        - DATABASE_URL=jdbc:mysql://db:3306/docdokuplm
+        - ES_SERVER_URI=http://es:9200
+        - ES_SERVER_SHARDS=4
+        - ES_SERVER_AUTO_EXPAND_REPLICAS="0-3"
+        - ES_SERVER_REPLICAS=0
+        - ES_SERVER_USERNAME=elastic
+        - ES_SERVER_PWD=changeme
+        #- ES_SERVER_AWS_SERVICE=
+        #- ES_SERVER_AWS_REGION=
+        #- ES_SERVER_AWS_KEY=
+        #- ES_SERVER_AWS_SECRET=
     volumes:
       - "./volumes/autodeploy:/opt/payara41/glassfish/domains/domain1/autodeploy"
       - "./volumes/vault:/var/lib/docdoku/vault"
