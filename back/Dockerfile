@@ -31,8 +31,8 @@ ARG SESSION_ENABLED=false
 ARG BASIC_AUTH_ENABLED=false
 ARG DATABASE_USER=docdokuplm_user
 ARG DATABASE_PWD=changeit
-ARG DATABASE_URL=jdbc:mysql://db:3306/docdokuplm
-ARG ES_SERVER_URI=http://es:9200
+ARG DATABASE_URL=jdbc:mysql://localhost:3306/docdokuplm
+ARG ES_SERVER_URI=http://localhost:9200
 ARG ES_SERVER_SHARDS=4
 ARG ES_SERVER_AUTO_EXPAND_REPLICAS=0-3
 ARG ES_SERVER_REPLICAS=0
@@ -42,7 +42,10 @@ ARG ES_SERVER_AWS_SERVICE
 ARG ES_SERVER_AWS_REGION
 ARG ES_SERVER_AWS_KEY
 ARG ES_SERVER_AWS_SECRET
-
+ARG SMTP_HOST=localhost
+ARG SMTP_PORT=25
+ARG SMTP_USER=myuser
+ARG SMTP_FROM_ADDR=docdokuplm@localhost
 
 ENV KEYSTORE_LOCATION /opt/payara41/dplm.jceks
 ENV KEYSTORE_KEY_ALIAS mykey
@@ -86,7 +89,7 @@ RUN \
  ${ASADMIN_PATH}/asadmin --user admin --passwordfile=/opt/pwdfile create-jvm-options -Dfile.encoding=UTF-8 && \
  ${ASADMIN_PATH}/asadmin --user admin --passwordfile=/opt/pwdfile delete-jvm-options '-Xmx512m' && \
  ${ASADMIN_PATH}/asadmin --user admin --passwordfile=/opt/pwdfile create-jvm-options -Xmx${HEAP_SIZE} && \
- ${ASADMIN_PATH}/asadmin --user admin --passwordfile=/opt/pwdfile create-javamail-resource --mailhost localhost --mailuser myUser --fromaddress myUser@localhost mail/docdokuSMTP && \
+ ${ASADMIN_PATH}/asadmin --user admin --passwordfile=/opt/pwdfile create-javamail-resource --mailhost ${SMTP_HOST} --mailuser ${SMTP_USER} --fromaddress ${SMTP_FROM_ADDR} --property mail.smtp.host=${SMTP_HOST}:mail.smtp.starttls.enable=false:mail.smtp.port=${SMTP_PORT}:mail.smtp.auth=false mail/docdokuSMTP && \
  ${ASADMIN_PATH}/asadmin --user admin --passwordfile=/opt/pwdfile set server.network-config.protocols.protocol.http-listener-1.http.upload-timeout-enabled=false && \
  ${ASADMIN_PATH}/asadmin --user admin --passwordfile=/opt/pwdfile set server.network-config.protocols.protocol.http-listener-1.http.connection-upload-timeout-millis=-1 && \
  ${ASADMIN_PATH}/asadmin --user admin --passwordfile=/opt/pwdfile set resources.jdbc-connection-pool.DocDokuPLMPool.property.URL=${DATABASE_URL} && \
