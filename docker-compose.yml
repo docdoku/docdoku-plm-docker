@@ -57,7 +57,7 @@ services:
         - DATABASE_URL=jdbc:mysql://db:3306/docdokuplm
         - ES_SERVER_URI=http://es:9200
         - ES_SERVER_SHARDS=4
-        - ES_SERVER_AUTO_EXPAND_REPLICAS="0-3"
+        - ES_SERVER_AUTO_EXPAND_REPLICAS=0-3
         - ES_SERVER_REPLICAS=0
         - ES_SERVER_USERNAME=elastic
         - ES_SERVER_PWD=changeme

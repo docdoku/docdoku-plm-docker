@@ -217,7 +217,7 @@ logs (){
 }
 
 health (){
-    curl https://docdokuplm.local:10080/eplmp-server-rest/api/platform/health
+    curl -k https://docdokuplm.local:10080/eplmp-server-rest/api/platform/health
 }
 
 list-apps (){

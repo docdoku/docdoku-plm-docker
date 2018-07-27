@@ -34,7 +34,7 @@ ARG DATABASE_PWD=changeit
 ARG DATABASE_URL=jdbc:mysql://db:3306/docdokuplm
 ARG ES_SERVER_URI=http://es:9200
 ARG ES_SERVER_SHARDS=4
-ARG ES_SERVER_AUTO_EXPAND_REPLICAS="0-3"
+ARG ES_SERVER_AUTO_EXPAND_REPLICAS=0-3
 ARG ES_SERVER_REPLICAS=0
 ARG ES_SERVER_PWD=changeme
 ARG ES_SERVER_USERNAME=elastic
@@ -100,7 +100,7 @@ RUN \
  ${ASADMIN_PATH}/asadmin --user admin --passwordfile=/opt/pwdfile set resources.custom-resource.auth.config.property."basic\.header\.enabled"=${BASIC_AUTH_ENABLED} && \
  ${ASADMIN_PATH}/asadmin --user admin --passwordfile=/opt/pwdfile set resources.custom-resource.elasticsearch.config.property.serverUri=${ES_SERVER_URI} && \
  ${ASADMIN_PATH}/asadmin --user admin --passwordfile=/opt/pwdfile set resources.custom-resource.elasticsearch.config.property.number_of_shards=${ES_SERVER_SHARDS} && \
- ${ASADMIN_PATH}/asadmin --user admin --passwordfile=/opt/pwdfile set resources.custom-resource.elasticsearch.config.property.auto_expand_replicas=${ES_SERVER_AUTO_EXPAND_REPLICAS} && \
+ ${ASADMIN_PATH}/asadmin --user admin --passwordfile=/opt/pwdfile set resources.custom-resource.elasticsearch.config.property.auto_expand_replicas="${ES_SERVER_AUTO_EXPAND_REPLICAS}" && \
  ${ASADMIN_PATH}/asadmin --user admin --passwordfile=/opt/pwdfile set resources.custom-resource.elasticsearch.config.property.number_of_replicas=${ES_SERVER_REPLICAS} && \
  ${ASADMIN_PATH}/asadmin --user admin --passwordfile=/opt/pwdfile set resources.custom-resource.elasticsearch.config.property.password=${ES_SERVER_PWD} && \
  ${ASADMIN_PATH}/asadmin --user admin --passwordfile=/opt/pwdfile set resources.custom-resource.elasticsearch.config.property.username=${ES_SERVER_USERNAME} && \
