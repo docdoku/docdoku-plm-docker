@@ -356,7 +356,7 @@ do-reset () {
   echo -e "Recreating database ..." && \
   docker exec -it docdoku-plm-docker_db bash -c \
       "mysql -u docdokuplm_user -D docdokuplm -p --execute=\"\
-       drop database docdokuplm; \
+       drop database if exists docdokuplm; \
        create database docdokuplm; \
       \"" && \
   echo -e "Removing uploaded files..." && \
