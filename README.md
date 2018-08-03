@@ -130,6 +130,10 @@ If you're using Ubuntu, you may need to increase virtual memory
 
 https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html
 
+You may also need to increase ulimit
+
+https://www.elastic.co/guide/en/elasticsearch/reference/current/setting-system-settings.html
+
 ## DockerInstallation
 
 ### Linux 
