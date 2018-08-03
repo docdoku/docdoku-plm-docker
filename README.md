@@ -110,6 +110,7 @@ Available apps and ports on docdokuplm.local
 * 10081: front (dev) + webservices
 * 10082: elasticsearch
 * 10083: kibana
+* 10084: MailHog
 
 ### Notes
 
