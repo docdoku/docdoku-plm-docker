@@ -123,6 +123,12 @@ For more advanced commands, all `docker-compose` commands are supported. See htt
 
 	(sudo) ln -s /path/to/platform-ctl /usr/bin/
 
+#### Ubuntu and elasticsearch
+
+If you're using Ubuntu, you may need to increase virtual memory
+
+https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html
+
 ## DockerInstallation
 
 ### Linux 
