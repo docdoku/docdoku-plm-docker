@@ -187,12 +187,12 @@ deploy-plm () {
   rm "${SCRIPT_DIR}"/volumes/autodeploy/.autodeploystatus/converter* 2> /dev/null
   rm "${SCRIPT_DIR}"/volumes/autodeploy/.autodeploystatus/importer* 2> /dev/null
 
-  cp "${SOURCES_DIR}/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5-SNAPSHOT.ear" \
-       "${SOURCES_DIR}/docdoku-plm/converter-dae/converter-dae-ear/target/converter-dae-ear-2.5-SNAPSHOT.ear" \
-       "${SOURCES_DIR}/docdoku-plm/converter-ifc/converter-ifc-ear/target/converter-ifc-ear-2.5-SNAPSHOT.ear" \
-       "${SOURCES_DIR}/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5-SNAPSHOT.ear" \
-       "${SOURCES_DIR}/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5-SNAPSHOT.ear" \
-       "${SOURCES_DIR}/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear" \
+  cp "${SOURCES_DIR}/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5.0.ear" \
+       "${SOURCES_DIR}/docdoku-plm/converter-dae/converter-dae-ear/target/converter-dae-ear-2.5.0.ear" \
+       "${SOURCES_DIR}/docdoku-plm/converter-ifc/converter-ifc-ear/target/converter-ifc-ear-2.5.0.ear" \
+       "${SOURCES_DIR}/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5.0.ear" \
+       "${SOURCES_DIR}/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5.0.ear" \
+       "${SOURCES_DIR}/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5.0.ear" \
         "${SCRIPT_DIR}/volumes/autodeploy/"
 }
 
@@ -200,15 +200,15 @@ verify-artifacts () {
     echo "Verifying artifacts ..."
     docker-compose run build-env md5sum \
         "/src/eplmp/eplmp-server/eplmp-server-ear/target/eplmp-server-ear.ear" \
-        "/src/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5-SNAPSHOT.ear" \
-        "/src/docdoku-plm/converter-dae/converter-dae-ear/target/converter-dae-ear-2.5-SNAPSHOT.ear" \
-        "/src/docdoku-plm/converter-ifc/converter-ifc-ear/target/converter-ifc-ear-2.5-SNAPSHOT.ear" \
-        "/src/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5-SNAPSHOT.ear" \
-        "/src/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5-SNAPSHOT.ear" \
-        "/src/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5-SNAPSHOT.ear" \
+        "/src/docdoku-plm/converter-all/converter-all-ear/target/converter-all-ear-2.5.0.ear" \
+        "/src/docdoku-plm/converter-dae/converter-dae-ear/target/converter-dae-ear-2.5.0.ear" \
+        "/src/docdoku-plm/converter-ifc/converter-ifc-ear/target/converter-ifc-ear-2.5.0.ear" \
+        "/src/docdoku-plm/converter-obj/converter-obj-ear/target/converter-obj-ear-2.5.0.ear" \
+        "/src/docdoku-plm/converter-step/converter-step-ear/target/converter-step-ear-2.5.0.ear" \
+        "/src/docdoku-plm/importer-attributes/importer-attributes-ear/target/importer-attributes-ear-2.5.0.ear" \
         "/src/docdoku-plm/docdoku-cli/target/docdoku-cli-jar-with-dependencies.jar" \
-        "/src/docdoku-plm/docdoku-api/target/docdoku-api-2.5-SNAPSHOT-json.jar" \
-        "/src/docdoku-plm/docdoku-api-java/target/docdoku-api-java-2.5-SNAPSHOT-jar-with-dependencies.jar" \
+        "/src/docdoku-plm/docdoku-api/target/docdoku-api-2.5.0-json.jar" \
+        "/src/docdoku-plm/docdoku-api-java/target/docdoku-api-java-2.5.0-jar-with-dependencies.jar" \
         "/src/docdoku-web-front/target/docdoku-web-front.zip"
 }
 
@@ -336,7 +336,7 @@ insert-sample () {
   docker-compose run build-env bash -c "\
    cd /src/docdoku-plm-sample-data && \
    mvn clean install dependency:copy-dependencies && \
-   java -classpath target/docdoku-plm-sample-data.jar:target/dependency/docdoku-api-java-2.5-SNAPSHOT.jar:target/dependency/* com.docdoku.loaders.Main -h http://back:8080/eplmp-server-rest -u "$1" -p "$2" \
+   java -classpath target/docdoku-plm-sample-data.jar:target/dependency/docdoku-api-java-2.5.0.jar:target/dependency/* com.docdoku.loaders.Main -h http://back:8080/eplmp-server-rest -u "$1" -p "$2" \
   "
 }
 
