@@ -45,7 +45,7 @@ Launch your browser once artifacts are all deployed
 
 Get platform health
 
-	./platofrm-ctl heatlh
+	./platform-ctl heatlh
 
 List platform containers
 
