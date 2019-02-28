@@ -30,7 +30,7 @@ DOCDOKU_WEB_FRONT_SSH_URL=git@github.com:docdoku/docdoku-web-front.git
 DOCDOKU_WEB_FRONT_HTTPS_URL=https://github.com/docdoku/docdoku-web-front.git
 DOCDOKU_PLM_SAMPLE_SSH_URL=git@github.com:docdoku/docdoku-plm-sample-data.git
 DOCDOKU_PLM_SAMPLE_HTTPS_URL=https://github.com/docdoku/docdoku-plm-sample-data.git
-DOCDOKU_PLM_VERSION=2.5.2-SNAPSHOT
+DOCDOKU_PLM_VERSION=2.5.2
 
 # Resolve script dir (may be a symlink or sourced script)
 dir () {
