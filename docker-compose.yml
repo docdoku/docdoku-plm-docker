@@ -120,7 +120,7 @@ services:
   # ElasticSearch instance
   es:
     container_name: docdoku-plm-docker_es
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.5.4
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.1
     environment:
       - cluster.name=docdokuplm
       - bootstrap.memory_lock=true
@@ -141,7 +141,7 @@ services:
   # Kibana instance
   kibana:
      container_name: docdoku-plm-docker_kibana
-     image: docker.elastic.co/kibana/kibana:6.5.4
+     image: docker.elastic.co/kibana/kibana:6.6.1
      environment:
        - SERVER_NAME=kibana
        - ELASTICSEARCH_URL=http://es:9200
