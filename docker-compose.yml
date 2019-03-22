@@ -97,6 +97,7 @@ services:
       - es
       - kibana
       - smtp
+      - adminer
     build:
       context: ./proxy
       args:
@@ -110,12 +111,14 @@ services:
       - "10082:10082"
       - "10083:10083"
       - "10084:10084"
+      - "10085:10085"
     links:
       - "front:front"
       - "back:back"
       - "es:es"
       - "kibana:kibana"
       - "smtp:smtp"
+      - "adminer:adminer"
 
   # ElasticSearch instance
   es:
@@ -191,6 +194,19 @@ services:
     ports: 
       - "1025:1025"
       - "8025:8025"
+
+  # SQL Management
+  adminer:
+    container_name: docdoku-plm-docker_adminer
+    image: adminer:4.7.1-standalone
+    networks:
+      - network
+    ports:
+      - "8282:8080"
+    depends_on: 
+      - db
+    links:
+      - db:db
 
 networks:
   network:
