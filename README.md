@@ -111,6 +111,7 @@ Available apps and ports on docdokuplm.local
 * 10082: elasticsearch
 * 10083: kibana
 * 10084: MailHog
+* 10085: Adminer
 
 ### Notes
 
