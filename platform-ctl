@@ -293,6 +293,10 @@ sql () {
      docker exec -it docdoku-plm-docker_db bash -c "mysql -u docdokuplm_user -D docdokuplm -p"
 }
 
+sqldump (){
+     docker exec -it docdoku-plm-docker_db bash -c "mysqldump -u docdokuplm_user -p docdokuplm > /var/lib/mysql/dump.sql"
+}
+
 browser () {
     if ! [ -z $BROWSER ] ; then
       echo -e "Using your $BROWSER env var"
@@ -392,6 +396,7 @@ usage () {
     echo -e "  ${GREEN}apps${NC}:                        List currently deployed applications"
     echo -e "  ${GREEN}logs${NC}:                        Read the logs from all containers"
     echo -e "  ${GREEN}sql${NC}:                         Connect to local mysql database"
+    echo -e "  ${GREEN}sqldump${NC}:                     Dumps the SQL database"
     echo -e "  ${GREEN}create-admin <login> <pwd>${NC}:  Create a new administrator"
     echo -e "  ${GREEN}create-user <login> <pwd>${NC}:   Create a new user"
     echo -e "  ${GREEN}browser${NC}:                     Open your web browser and reach DocDokuPLM"
@@ -456,6 +461,9 @@ case "$1" in
     ;;
 "sql")
     sql
+    ;;
+"sqldump")
+    sqldump
     ;;
 "browser")
     browser "$2"
