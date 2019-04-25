@@ -32,6 +32,8 @@ DOCDOKU_PLM_SAMPLE_SSH_URL=git@github.com:docdoku/docdoku-plm-sample-data.git
 DOCDOKU_PLM_SAMPLE_HTTPS_URL=https://github.com/docdoku/docdoku-plm-sample-data.git
 DOCDOKU_PLM_VERSION=2.5.3-SNAPSHOT
 
+. ./scriptUtils/updateVersion.sh #load function in selected file
+
 # Resolve script dir (may be a symlink or sourced script)
 dir () {
      SOURCE="${BASH_SOURCE[0]}"
@@ -372,6 +374,22 @@ do-reset () {
   restart-containers
 }
 
+process-pom-upgrade(){
+
+    updatePomFile $1 $2
+    processPomCheckIn
+    commitChanges
+    pushChanges
+}
+
+process-release(){
+
+    if [ $# -ne 1 ];then
+
+      echo -e "missing arguments see help for more informations"
+   fi
+   tagChanges $1
+}
 usage () {
 
     GREEN='\033[0;32m'
@@ -382,28 +400,30 @@ usage () {
     echo -e ""
     echo -e "Available commands:"
     echo -e ""
-    echo -e "  ${GREEN}init-repo [<ssh|https>]${NC}:     Init the repositories to ./volumes/src/"
-    echo -e "  ${GREEN}build-images${NC}:                Build the base docker images from docker-compose file"
-    echo -e "  ${GREEN}build-artifacts${NC}:             Build the main artifacts from eplmp and docdoku-plm sources"
-    echo -e "  ${GREEN}build <target>${NC}:              Build  specified artifact (target values: front, eplmp, plm, sample)"
-    echo -e "  ${GREEN}test <target>${NC}:               Launch e2e tests. Target values: front, java-api)"
-    echo -e "  ${GREEN}verify-artifacts${NC}:            Verify the main artifacts"
-    echo -e "  ${GREEN}deploy [target]${NC}:             Copy the main artifacts to the autodeploy volume. Target values (front, eplmp, plm)"
-    echo -e "  ${GREEN}up${NC}:                          Start the containers"
-    echo -e "  ${GREEN}down${NC}:                        Stop the containers"
-    echo -e "  ${GREEN}status${NC}:                      Get a status of running images"
-    echo -e "  ${GREEN}health${NC}:                      Run a health-check (webservice)"
-    echo -e "  ${GREEN}apps${NC}:                        List currently deployed applications"
-    echo -e "  ${GREEN}logs${NC}:                        Read the logs from all containers"
-    echo -e "  ${GREEN}sql${NC}:                         Connect to local mysql database"
-    echo -e "  ${GREEN}sqldump${NC}:                     Dumps the SQL database"
-    echo -e "  ${GREEN}create-admin <login> <pwd>${NC}:  Create a new administrator"
-    echo -e "  ${GREEN}create-user <login> <pwd>${NC}:   Create a new user"
-    echo -e "  ${GREEN}browser${NC}:                     Open your web browser and reach DocDokuPLM"
-    echo -e "  ${GREEN}run 'command'${NC}:               Run a custom command in build env"
-    echo -e "  ${GREEN}asadmin ['command']${NC}:         Run asadmin in payara container (accept commands)"
-    echo -e "  ${GREEN}insert-sample <login> <pwd>${NC}: Insert some sample data into a new workspace"
-    echo -e "  ${GREEN}help${NC}:                        Display this lines"
+    echo -e "  ${GREEN}init-repo [<ssh|https>]${NC}:        Init the repositories to ./volumes/src/"
+    echo -e "  ${GREEN}build-images${NC}:                   Build the base docker images from docker-compose file"
+    echo -e "  ${GREEN}build-artifacts${NC}:                Build the main artifacts from eplmp and docdoku-plm sources"
+    echo -e "  ${GREEN}build <target>${NC}:                 Build  specified artifact (target values: front, eplmp, plm, sample)"
+    echo -e "  ${GREEN}test <target>${NC}:                  Launch e2e tests. Target values: front, java-api)"
+    echo -e "  ${GREEN}verify-artifacts${NC}:               Verify the main artifacts"
+    echo -e "  ${GREEN}deploy [target]${NC}:                Copy the main artifacts to the autodeploy volume. Target values (front, eplmp, plm)"
+    echo -e "  ${GREEN}up${NC}:                             Start the containers"
+    echo -e "  ${GREEN}down${NC}:                           Stop the containers"
+    echo -e "  ${GREEN}status${NC}:                         Get a status of running images"
+    echo -e "  ${GREEN}health${NC}:                         Run a health-check (webservice)"
+    echo -e "  ${GREEN}apps${NC}:                           List currently deployed applications"
+    echo -e "  ${GREEN}logs${NC}:                           Read the logs from all containers"
+    echo -e "  ${GREEN}sql${NC}:                            Connect to local mysql database"
+    echo -e "  ${GREEN}sqldump${NC}:                        Dumps the SQL database"
+    echo -e "  ${GREEN}create-admin <login> <pwd>${NC}:     Create a new administrator"
+    echo -e "  ${GREEN}create-user <login> <pwd>${NC}:      Create a new user"
+    echo -e "  ${GREEN}browser${NC}:                        Open your web browser and reach DocDokuPLM"
+    echo -e "  ${GREEN}run 'command'${NC}:                  Run a custom command in build env"
+    echo -e "  ${GREEN}asadmin ['command']${NC}:            Run asadmin in payara container (accept commands)"
+    echo -e "  ${GREEN}insert-sample <login> <pwd>${NC}:    Insert some sample data into a new workspace"
+    echo -e "  ${GREEN}upgrade-poms <oldTag> <newTag>${NC}: Change the version of all pom file of all dependencies"
+    echo -e "  ${GREEN}release <tag>${NC}:                  Create a tag for all sources of dependencies used"
+    echo -e "  ${GREEN}help${NC}:                           Display this lines"
 
     echo -e ""
 }
@@ -485,6 +505,16 @@ case "$1" in
     ;;
 "reset")
     reset
+    ;;
+
+"upgrade-poms")
+
+    process-pom-upgrade "$2" "$3"
+    ;;
+
+"release")
+
+    process-release "$1"
     ;;
 *)
     usage
