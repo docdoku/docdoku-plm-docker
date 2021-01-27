@@ -1,0 +1,11 @@
+{
+    "server": {
+        "ssl": false,
+        "domain": "localhost",
+        "port": 8001,
+        "contextPath": "/docdoku-plm-server-rest",
+        "wsDomain": "localhost"
+    },
+    "contextPath": "/",
+    "preferLoginWith": false
+}

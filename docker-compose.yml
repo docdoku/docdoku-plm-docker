@@ -1,0 +1,103 @@
+version: '3.7'
+
+networks:
+  network:
+    driver: bridge
+    
+volumes: 
+  db-volume:
+  es-volume:
+
+services:
+
+  front:
+    image: docdoku/docdoku-plm-front:2.6.1
+    networks:
+      - network
+    ports:
+      - 8000:80
+    volumes:
+      - ./env/webapp.properties.json:/usr/share/nginx/html/webapp.properties.json
+
+  server:
+    image: docdoku/docdoku-plm-server:2.6.1
+    env_file: ./env/docdoku-plm-server.env
+    volumes:
+      - ./data:/var/lib/docdoku/vault
+      - ./keystore:/opt/payara41/keystore
+    depends_on:
+      - db
+      - es
+      - smtp   
+    networks:
+      - network
+    ports:
+      - 8001:8080
+
+  conversion:
+    image: docdoku/docdoku-plm-conversion-service:2.6.0
+    networks:
+      - network
+    depends_on: 
+      - kafka
+      - server
+    
+  es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.1
+    env_file: ./env/elasticsearch.env
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - network    
+    volumes:
+      - es-volume:/usr/share/elasticsearch/data
+  
+  kibana:
+     image: docker.elastic.co/kibana/kibana:6.6.1
+     env_file: ./env/kibana.env      
+     networks:
+       - network
+     depends_on:
+       - es
+     ports:
+       - 8002:5601
+
+  db:
+    image: postgres:13.1-alpine
+    env_file: ./env/db.env     
+    volumes:
+      - db-volume:/var/lib/mysql
+    networks:
+      - network    
+
+  smtp:
+    image: mailhog/mailhog:v1.0.1
+    networks:
+      - network
+    ports: 
+      #- 1025:1025
+      - 8003:8025
+
+  adminer:
+    image: adminer:4.7.1-standalone
+    networks:
+      - network
+    ports:
+      - 8004:8080
+    depends_on: 
+      - db
+
+  zookeeper:
+    image: wurstmeister/zookeeper:3.4.6
+    networks:
+      - network
+
+  kafka:
+    image: wurstmeister/kafka:2.13-2.7.0
+    env_file: ./env/kafka.env    
+    networks:
+      - network
+    depends_on:
+      - zookeeper
