@@ -57,7 +57,28 @@ Create a new entry in /etc/hosts. Note: after editing this file you might have t
 
 Import the [rootCA](./proxy/ssl/rootCA.pem) sslcertificate to your browser trusted authorities.
 
+Make sure to edit the `docker-compose.yml` to use `front-ssl.json` instead of `front.json` and edit `env/back.env` to set `DOCDOKU_PLM_CODEBASE` to `https://docdokuplm.local:9000`, then recreate the `back` and `front` service if they are already running.
+
+```
+$ docker-compose up --force-recreate --no-deps front
+$ docker-compose up --force-recreate --no-deps back
+```
+
 Then you can access to https://docdokuplm.local:9000 from your web browser
+
+## Cleaning every containers/volumes
+
+In case you want to start a new fresh install run this following commands.
+
+Note: this will delete all data stored (database, files, volumes) and containers. Make sure to backup everything first.
+
+```
+$ docker-compose rm --stop --force -v
+$ rm -rf ./data
+$ rm ./keystore
+$ docker volume rm docdoku-plm-server-volume
+$ ./start.sh
+```
 
 ## Running in production
 
