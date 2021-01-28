@@ -26,8 +26,12 @@ if [ -d data ];
 then 
     echo 'Data directory found'
 else
-    echo 'Creating data directory...'
-    mkdir data    
+    echo 'Creating data directory and volume...'
+    mkdir data
+    docker volume create --driver local \
+        --opt type=none \
+        --opt device=$(pwd)/data \
+        --opt o=bind docdoku-plm-server-volume
 fi
 
 echo $(pwd)/data

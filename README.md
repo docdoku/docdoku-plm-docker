@@ -31,7 +31,7 @@ $ docker-compose ps
 
 Then you can access to http://localhost:8000 from your web browser
 
-## Port mapping
+## Default port mapping
 
 ```
 --------------------------
@@ -45,7 +45,20 @@ Port    Service
 --------------------------
 ```
 
+## SSL support (optional)
+
+You can get HTTPS on your localhost working out of the box.
+
+Create a new entry in /etc/hosts. Note: after editing this file you might have to restart your networking service depending on your OS.
+
+```
+127.0.0.1 docdokuplm.local
+```
+
+Import the [rootCA](./proxy/ssl/rootCA.pem) sslcertificate to your browser trusted authorities.
+
+Then you can access to https://docdokuplm.local:9000 from your web browser
+
 ## Running in production
 
-Make sure to edit all passwords in env files before you start the script.
-
+Make sure to edit all passwords in env files before you start the script. Please also consider using a firewall and remove any unnecessary port mapping from docker-compose.yml.
