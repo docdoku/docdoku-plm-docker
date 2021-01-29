@@ -13,19 +13,21 @@ volumes:
       
 services:
 
-  front:
-    image: docdoku/docdoku-plm-front:2.6.1
-    networks:
-      - network
-    ports:
-      - 8000:80
-    volumes:
-      - ./env/front.json:/usr/share/nginx/html/webapp.properties.json
+  # Repalced with proxy service
+  #front:
+  #  image: docdoku/docdoku-plm-front:2.6.1
+  #  networks:
+  #    - network
+  #  ports:
+  #    - 8000:80
+  #  volumes:
+  #    - ./env/front-ssl.json:/usr/share/nginx/html/webapp.properties.json
 
   back:
     image: docdoku/docdoku-plm-server:2.6.1
     env_file: ./env/back.env
     volumes:      
+      - ./autodeploy:/opt/payara/appserver/glassfish/domains/production/autodeploy
       - ./keystore:/opt/payara41/keystore
       - docdoku-plm-server-volume:/var/lib/docdoku/vault
       - conversion-volume:/var/lib/docdoku/conversions
@@ -37,7 +39,12 @@ services:
       - network
     ports:
       - 8001:8080
-
+      # debug port
+      - 9009:9009
+      # DAS
+      - 4848:4848
+      # JMX
+      - 8686:8686
   conversion:
     image: docdoku/docdoku-plm-conversion-service:2.6.0
     env_file: ./env/conversion.env
@@ -113,12 +120,23 @@ services:
   ssl-proxy:
     image: nginx:1.19.1-alpine
     volumes:
+      # certs
       - ./proxy/ssl:/etc/nginx/ssl
+      # proxy conf
       - ./proxy/nginx.conf:/etc/nginx/conf.d/default.conf
+      # mount sources and dist
+      - ../docdoku-plm-front/app:/usr/share/nginx/html/app      
+      - ../docdoku-plm-front/dist:/usr/share/nginx/html/dist
+      # app ssl config
+      - ./env/app-ssl.json:/usr/share/nginx/html/app-ssl.json
+      # dist ssl config
+      - ./env/dist-ssl.json:/usr/share/nginx/html/dist-ssl.json
     ports:
+      # sources
       - 9000:443
+      # build
+      - 9001:444
     networks: 
       - network
     depends_on: 
-      - front
       - back

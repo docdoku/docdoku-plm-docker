@@ -55,6 +55,8 @@ fi
 
 echo $(pwd)/keystore
 
+mkdir -p autodeploy
+
 # Start the containers
 docker-compose pull
 docker-compose up -d --force-recreate --remove-orphans
