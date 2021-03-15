@@ -6,6 +6,7 @@ Easy setup for DocDokuPLM with docker-compose.
 
 * [Docker](https://docs.docker.com/get-docker/)
 * [Docker Compose](https://docs.docker.com/compose/install/)
+* Keytool (From any JRE, see https://openjdk.java.net/)
 * [Set vm.max_map_count to at least 262144](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#_set_vm_max_map_count_to_at_least_262144)
 
 ## Start DocDokuPLM:
