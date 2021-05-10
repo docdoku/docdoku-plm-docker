@@ -14,7 +14,7 @@ volumes:
 services:
 
   front:
-    image: docdoku/docdoku-plm-front:2.6.1
+    image: docdoku/docdoku-plm-front:2.6.2
     networks:
       - network
     ports:
@@ -23,7 +23,7 @@ services:
       - ./env/front.json:/usr/share/nginx/html/webapp.properties.json
 
   back:
-    image: docdoku/docdoku-plm-server:2.6.1
+    image: docdoku/docdoku-plm-server:2.6.2
     env_file: ./env/back.env
     volumes:      
       - ./keystore:/opt/payara41/keystore
@@ -39,7 +39,7 @@ services:
       - 8001:8080
 
   conversion:
-    image: docdoku/docdoku-plm-conversion-service:2.6.0
+    image: docdoku/docdoku-plm-conversion-service:2.6.2
     env_file: ./env/conversion.env
     networks:
       - network
